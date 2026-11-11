@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="zh-Hant" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="之字形鐵路上的人 The People of the Zig Zag：羅聖皓 2026 年 Zig Zag Railway 實習紀錄（中英雙語）。">
+<title>之字形鐵路上的人</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap">
+<style>
+/* Layout: a sticky zigzag route map on the left follows the reader down the line (Clarence top-left, Top Points right, Bottom Points bottom-left); chapters scroll on the right, each one a stop. Ticket, signal-box and lever-frame details on a eucalyptus ground. */
+:root{
+  --bg:#EDF0EA; --paper:#F8F9F5; --ink:#1D2724; --muted:#56645E; --rule:#C9D1C8;
+  --euc:#5E7A6C; --sand:#B26A3A; --signal:#E3B23C; --red:#9A3326; --blue:#2F5C8A; --track:#3B4743; --onsignal:#1D2724;
+  --display:"Big Shoulders Display","Arial Narrow",sans-serif;
+  --serif:"Noto Serif TC","Songti TC",serif;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121816; --paper:#1A2220; --ink:#E4E9E3; --muted:#9AA8A1; --rule:#2E3A36;
+  --euc:#8FB09F; --sand:#D99566; --signal:#E8BE55; --red:#E07A68; --blue:#7FA9D6; --track:#AAB6B0; --onsignal:#1D2724; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121816; --paper:#1A2220; --ink:#E4E9E3; --muted:#9AA8A1; --rule:#2E3A36;
+  --euc:#8FB09F; --sand:#D99566; --signal:#E8BE55; --red:#E07A68; --blue:#7FA9D6; --track:#AAB6B0; --onsignal:#1D2724; color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font:16px/1.75 var(--sans);margin:0}
+[data-lang="zh"] .en,[data-lang="en"] .zh{display:none!important}
+h1,h2,h3,h4{text-wrap:balance;margin:0}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+img{max-width:100%;height:auto;display:block}
+figure{margin:0}
+
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.bar-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px;height:52px}
+.brand{font:800 20px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.brand small{font:400 12px var(--mono);letter-spacing:0;color:var(--muted);text-transform:none;margin-left:8px}
+.bar .grow{flex:1;min-width:0}
+.lang{display:flex;border:1px solid var(--ink);border-radius:2px;overflow:hidden}
+.lang button{border:0;background:none;padding:4px 10px;font:600 13px var(--mono);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.mini{display:none;font:600 12px var(--mono);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* frame */
+.frame{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.route{position:sticky;top:calc(env(safe-area-inset-top,0px) + 72px);height:calc(100vh - 100px);max-height:640px;padding-block:20px}
+.route svg{width:100%;height:100%;overflow:visible}
+.route .line{fill:none;stroke:var(--track);stroke-width:3}
+.route .sleepers{fill:none;stroke:var(--track);stroke-width:9;stroke-dasharray:1.5 7;opacity:.35}
+.route .stn{cursor:pointer}
+.route .stn circle{fill:var(--paper);stroke:var(--ink);stroke-width:2.5}
+.route .stn text{font:700 13px var(--display);letter-spacing:.06em;fill:var(--ink);text-transform:uppercase}
+.route .rev{font:600 10px var(--mono);fill:var(--sand)}
+.route .train rect{fill:var(--red)}
+.route .train .cab{fill:var(--ink)}
+.route .here{font:600 11px var(--mono);fill:var(--muted)}
+
+main{min-width:0;padding-bottom:40px}
+section.ch{padding-block:72px 32px;border-bottom:1px dashed var(--rule);scroll-margin-top:64px}
+.stop{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;font:600 12px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+.stop b{color:var(--sand);font-weight:600}
+h2{font:900 clamp(28px,4vw,40px)/1.25 var(--serif);margin-bottom:18px}
+[data-lang="en"] h2{font:800 clamp(34px,5vw,52px)/1.02 var(--display);text-transform:uppercase;letter-spacing:.01em}
+h3{font:700 19px/1.45 var(--sans)}
+.lede{font-size:18px;max-width:62ch}
+p{max-width:65ch;margin:0 0 14px}
+.muted{color:var(--muted)}
+.cap{font:400 12.5px/1.6 var(--mono);color:var(--muted);margin-top:6px}
+.note{font:400 12.5px/1.7 var(--mono);color:var(--muted);max-width:80ch;margin-top:18px}
+
+/* photos: everything 4:3 */
+.ph img{width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;border-radius:3px;background:var(--rule)}
+.lead-ph{margin-block:4px 28px;max-width:860px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-block:20px;max-width:860px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-block:20px}
+.grid2 .ph,.grid3 .ph{min-width:0}
+.ai{position:relative}
+.ai::after{content:attr(data-label);position:absolute;right:6px;bottom:6px;font:600 10.5px var(--mono);background:color-mix(in srgb,var(--ink) 75%,transparent);color:var(--bg);padding:2px 6px;border-radius:2px}
+
+/* hero */
+.hero{padding-block:40px 32px}
+.ticket{display:grid;grid-template-columns:minmax(0,1fr) 170px;background:var(--paper);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:28px;max-width:860px}
+.ticket .main{padding:22px 24px;min-width:0}
+.ticket .stub{border-left:2px dashed var(--rule);padding:18px 14px;font:400 11px/1.6 var(--mono);color:var(--muted);display:flex;flex-direction:column;justify-content:space-between;gap:10px}
+.ticket .stub strong{display:block;font:800 30px/1 var(--display);color:var(--red)}
+.ticket h1{font:900 clamp(34px,6vw,56px)/1.15 var(--serif);margin:6px 0 10px}
+[data-lang="en"] .ticket h1{font:800 clamp(44px,8vw,80px)/.95 var(--display);text-transform:uppercase}
+.ticket .from{font:600 13px var(--mono);letter-spacing:.06em;color:var(--euc);text-transform:uppercase}
+.board{display:inline-block;background:var(--signal);color:var(--onsignal);font:800 15px var(--display);letter-spacing:.12em;text-transform:uppercase;padding:10px 18px;border:0;border-radius:2px;cursor:pointer;text-decoration:none}
+
+/* timeline */
+.tl{list-style:none;margin:24px 0 0;padding:0;position:relative}
+.tl::before{content:"";position:absolute;left:84px;top:6px;bottom:6px;width:2px;background:var(--rule)}
+.tl li{display:grid;grid-template-columns:72px 24px minmax(0,1fr);gap:0 12px;padding-block:12px}
+.tl .yr{font:600 13px/1.4 var(--mono);text-align:right;padding-top:3px;font-variant-numeric:tabular-nums}
+.tl .dot{width:12px;height:12px;border-radius:50%;background:var(--paper);border:2px solid var(--track);margin:6px 0 0 1px;position:relative;z-index:1}
+.tl li.key .dot{background:var(--red);border-color:var(--red)}
+.tl li.key .yr{color:var(--red)}
+.tl .ev{min-width:0}
+.tl .ev h3{font-size:16.5px}
+.tl .ev p{font-size:15px;color:var(--muted);margin:2px 0 0}
+.tl .pics{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:10px;max-width:560px}
+.tl .pics.one{grid-template-columns:minmax(0,340px)}
+
+/* zigzag animation */
+.demo{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:16px;margin-block:20px;max-width:860px}
+.demo .svgwrap{overflow-x:auto}
+.demo svg{width:100%;min-width:0;height:auto;display:block}
+.demo .ctl{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:10px;align-items:center}
+.demo .say{font:400 13px var(--mono);color:var(--muted);min-height:1.6em;flex:1;min-width:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font:400 12px var(--mono);color:var(--muted)}
+.legend i{display:inline-block;width:26px;height:0;border-top:3px solid var(--track);vertical-align:middle;margin-right:6px}
+.legend i.dash{border-top:3px dashed var(--blue)}
+.chip{border:1px solid var(--ink);background:none;border-radius:2px;padding:5px 12px;font:600 13px var(--mono);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chip:disabled{opacity:.4;cursor:default}
+details.qa{border-top:1px solid var(--rule);padding-block:12px;max-width:65ch}
+details.qa:last-of-type{border-bottom:1px solid var(--rule)}
+details.qa summary{cursor:pointer;font-weight:700}
+details.qa p{margin-top:8px}
+
+/* lever game */
+.game{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:16px;margin-block:20px}
+.game .top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.game .count{font:600 12px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.yard{overflow-x:auto}
+.yard svg{width:100%;min-width:0;height:auto;display:block}
+.yard .rail{fill:none;stroke:var(--track);stroke-width:3}
+.yard .rail.off{stroke:var(--rule)}
+.yard .plat{fill:color-mix(in srgb,var(--sand) 25%,transparent)}
+.yard text{font:600 11px var(--mono);fill:var(--muted)}
+.yard .lbl{font:800 13px var(--display);fill:var(--ink);letter-spacing:.06em}
+#loco{transition:transform .7s ease-in-out}
+@media (prefers-reduced-motion:reduce){#loco{transition:none}}
+.msg{font:500 14.5px/1.6 var(--sans);min-height:3.2em;margin:10px 0;padding:10px 12px;border-left:4px solid var(--signal);background:color-mix(in srgb,var(--signal) 12%,transparent);border-radius:2px}
+.msg.ok{border-color:var(--euc);background:color-mix(in srgb,var(--euc) 16%,transparent)}
+.frameL{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:6px}
+.lever{width:64px;border:1px solid var(--rule);background:var(--bg);border-radius:3px;padding:6px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
+.lever .slot{position:relative;width:12px;height:70px;background:var(--rule);border-radius:6px}
+.lever .h{position:absolute;left:-6px;width:24px;height:22px;border-radius:3px;top:0;transition:top .25s}
+.lever[aria-pressed="true"] .h{top:48px}
+.lever .n{font:800 18px/1 var(--display)}
+.lever .k{font:400 10px/1.3 var(--mono);color:var(--muted);text-align:center}
+.lever.red .h{background:var(--red)} .lever.blue .h{background:var(--blue)} .lever.black .h{background:var(--ink)}
+.lever.shake{animation:shake .35s}
+.flash{animation:flash .5s 3}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes flash{50%{box-shadow:0 0 0 4px var(--signal)}}
+@media (prefers-reduced-motion:reduce){.lever.shake,.flash{animation:none}.flash{box-shadow:0 0 0 4px var(--signal)}}
+.gap{width:14px}
+.engine{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.gamecols{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;margin-top:14px;align-items:start}
+.steps{margin:0;padding-left:1.4em;font-size:14px;display:grid;gap:4px}
+.steps li{color:var(--muted)}
+.steps li.now{color:var(--ink);font-weight:700}
+.steps li.done{text-decoration:line-through;text-decoration-color:var(--rule)}
+table.opt{border-collapse:collapse;font-size:13.5px;width:100%;margin-top:10px}
+table.opt th,table.opt td{border-top:1px solid var(--rule);padding:6px 4px;text-align:left;vertical-align:top}
+table.opt th{font:600 11px var(--mono);color:var(--muted);text-transform:uppercase}
+.mono{font-family:var(--mono)}
+.sub{font:600 12px var(--mono);color:var(--sand);text-transform:uppercase;letter-spacing:.08em;margin:24px 0 8px}
+
+/* people */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-block:18px}
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:16px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card:hover{border-color:var(--ink)}
+.card[aria-expanded="true"]{grid-column:1/-1;border-color:var(--ink)}
+.card .nm{font:800 24px/1 var(--display);text-transform:uppercase;letter-spacing:.02em}
+.card .role{font-size:14px;line-height:1.5}
+.card .since{font:400 12px/1.5 var(--mono);color:var(--sand)}
+.card .more{display:none;border-top:1px dashed var(--rule);padding-top:10px;margin-top:4px}
+.card[aria-expanded="true"] .more{display:block}
+.card .more p{margin:0 0 10px}
+.card .before{font-size:13px;color:var(--muted)}
+.card .before b{font:600 11px var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-right:6px}
+.card .tog{font:600 11px var(--mono);color:var(--muted);margin-top:auto}
+
+/* skill tree */
+.tree{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;margin-top:20px;align-items:start}
+.tree svg{width:100%;height:auto}
+.node{cursor:pointer}
+.node rect{fill:var(--paper);stroke:var(--rule);stroke-width:1.5}
+.node text{font:600 12.5px var(--sans);fill:var(--muted);pointer-events:none}
+.node.open rect{stroke:var(--ink);stroke-width:2}
+.node.open text{fill:var(--ink)}
+.node.done rect{fill:var(--signal);stroke:var(--signal)}
+.node.done text{fill:var(--onsignal)}
+.node.sel rect{stroke:var(--red);stroke-width:2.5}
+.node.locked rect{stroke-dasharray:4 3;opacity:.6}
+.edge{fill:none;stroke:var(--rule);stroke-width:2}
+.edge.on{stroke:var(--signal)}
+.panel{background:var(--paper);border:1px solid var(--rule);border-radius:4px;overflow:hidden;position:sticky;top:90px;min-width:0}
+.panel .pimg{position:relative}
+.panel .pimg img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.panel .car{position:absolute;right:8px;bottom:8px;display:flex;gap:4px}
+.panel .car button{border:0;background:color-mix(in srgb,var(--ink) 75%,transparent);color:var(--bg);font:600 11px var(--mono);padding:3px 8px;border-radius:2px;cursor:pointer}
+.panel .in{padding:16px}
+.panel .lvl{font:600 12px var(--mono);color:var(--sand);text-transform:uppercase;letter-spacing:.08em}
+.panel .pcap{font:400 12px var(--mono);color:var(--muted);margin:4px 0 8px}
+.panel blockquote{margin:12px 0 0;padding-left:12px;border-left:3px solid var(--signal);font:600 15px/1.6 var(--serif)}
+[data-lang="en"] .panel blockquote{font-family:var(--sans);font-style:italic;font-weight:500}
+.panel .act{margin-top:12px}
+.final{font:700 15px var(--sans);margin-top:12px;color:var(--euc)}
+
+/* preserve */
+.keeps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}
+details.keep{background:var(--paper);border:1px solid var(--rule);border-radius:4px;overflow:hidden;min-width:0}
+details.keep[open]{border-color:var(--ink)}
+details.keep summary{cursor:pointer;list-style:none;display:block}
+details.keep summary::-webkit-details-marker{display:none}
+details.keep .hd{display:flex;gap:10px;align-items:baseline;padding:12px 14px}
+details.keep .hd b{font:800 22px/1 var(--display);color:var(--sand)}
+details.keep .hd h3{font-size:16.5px;flex:1}
+details.keep .hd i{font:normal 600 16px var(--mono);color:var(--muted)}
+details.keep[open] .hd i{transform:rotate(45deg)}
+details.keep .bd{padding:0 14px 14px;font-size:15px}
+details.keep .bd h4{font:600 11px var(--mono);color:var(--sand);text-transform:uppercase;letter-spacing:.08em;margin:8px 0 2px}
+details.keep .bd p{margin:0}
+
+/* workshop */
+.jobs{display:grid;gap:18px;margin-top:22px}
+.job{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:18px;background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:14px;align-items:start}
+.job .pics{display:grid;gap:8px}
+.job.text{grid-template-columns:minmax(0,1fr)}
+.job .n{font:800 13px var(--mono);color:var(--sand)}
+.job h3{margin-bottom:6px}
+.job p{font-size:15px;margin:0 0 8px}
+.limits{list-style:none;padding:0;margin:8px 0;display:grid;gap:4px;font:400 13px/1.5 var(--mono)}
+.limits li{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dotted var(--rule);padding-bottom:3px}
+.limits b{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.why{margin-top:22px;max-width:65ch}
+.why h3{margin-bottom:6px}
+.pull{margin:18px 0 0;padding-left:14px;border-left:3px solid var(--signal);font:600 18px/1.6 var(--serif)}
+[data-lang="en"] .pull{font-family:var(--sans);font-style:italic;font-weight:500}
+.pull cite{display:block;font:400 12px var(--mono);color:var(--muted);font-style:normal;margin-top:4px}
+
+/* compare */
+.nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:20px 0 6px}
+.nums div{border-top:3px solid var(--ink);padding-top:8px;min-width:0}
+.nums b{display:block;font:800 44px/1 var(--display);color:var(--sand);font-variant-numeric:tabular-nums}
+.nums span{font-size:13.5px;line-height:1.5;display:block;margin-top:4px}
+.pairs{display:grid;gap:12px;margin-top:22px}
+.pair{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:14px 16px;min-width:0}
+.pair .hd{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:10px}
+.pair .hd b{font:800 18px var(--mono);color:var(--muted)}
+.pair .hd h3{font-size:17px;flex:1;min-width:10ch}
+.pair .cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.pair .cols div{min-width:0}
+.pair h4{font:800 15px var(--display);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.pair .y89 h4{color:var(--muted)} .pair .y26 h4{color:var(--euc)}
+.pair p{font-size:14.5px;margin:0}
+.pair .verdict{font:400 12.5px/1.5 var(--mono);color:var(--muted);margin-top:10px;border-top:1px dashed var(--rule);padding-top:8px}
+.badge{font:600 11.5px var(--mono);padding:2px 8px;border-radius:2px;white-space:nowrap;color:var(--ink)}
+.b-same{background:color-mix(in srgb,var(--euc) 28%,transparent)}
+.b-shift{background:color-mix(in srgb,var(--signal) 40%,transparent)}
+.b-diff{background:color-mix(in srgb,var(--red) 25%,transparent)}
+.concl{margin-top:24px;font:600 18px/1.7 var(--serif);max-width:60ch}
+[data-lang="en"] .concl{font-family:var(--sans);font-weight:500}
+
+/* visions */
+.vis{list-style:none;padding:0;margin:20px 0 0;border-top:1px solid var(--ink);max-width:760px}
+.vis details{border-bottom:1px solid var(--rule)}
+.vis summary{cursor:pointer;list-style:none;display:flex;gap:14px;align-items:baseline;padding:14px 4px}
+.vis summary::-webkit-details-marker{display:none}
+.vis summary b{font:600 13px var(--mono);color:var(--sand);min-width:2.2ch;font-variant-numeric:tabular-nums}
+.vis summary h3{font-size:17px;flex:1}
+.vis summary i{font:normal 600 18px var(--mono);color:var(--muted);transition:transform .2s}
+.vis details[open] summary i{transform:rotate(45deg)}
+.vis details[open] summary h3{color:var(--euc)}
+.vis .bd{padding:0 4px 16px calc(2.2ch + 18px);font-size:15.5px}
+.vis .bd p{margin:0}
+
+/* footer */
+.thanks{padding-block:64px 24px}
+.thanks .big{max-width:none;margin-bottom:12px}
+.thanks h2{margin-top:28px}
+.disc{font:400 12.5px/1.7 var(--mono);color:var(--muted);border-top:1px solid var(--rule);padding-top:14px;margin-top:22px}
+.disc p{max-width:80ch}
+
+@media (max-width:860px){
+  .frame{grid-template-columns:minmax(0,1fr);gap:0}
+  .route{display:none}
+  .mini{display:block}
+  .tree,.gamecols{grid-template-columns:minmax(0,1fr)}
+  .panel{position:static}
+  .keeps{grid-template-columns:minmax(0,1fr)}
+  .nums{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:600px){
+  .grid3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ticket{grid-template-columns:minmax(0,1fr)}
+  .ticket .stub{border-left:0;border-top:2px dashed var(--rule);flex-direction:row;flex-wrap:wrap;gap:12px 20px}
+  .tl::before{left:60px}
+  .tl li{grid-template-columns:48px 24px minmax(0,1fr)}
+  .job,.pair .cols{grid-template-columns:minmax(0,1fr)}
+  .brand small{display:none}
+  .lever{width:calc((100% - 54px)/6);min-width:44px}
+  .gap{width:6px}
+}
+</style>
+</head>
+<body>
+
+<header class="bar"><div class="bar-in">
+  <div class="brand">Zig Zag <small class="zh">之字形鐵路</small><small class="en">Railway</small></div>
+  <div class="grow"><div class="mini" id="mini" aria-live="polite"></div></div>
+  <div class="lang" role="group" aria-label="Language">
+    <button type="button" id="b-zh" aria-pressed="true">中</button>
+    <button type="button" id="b-en" aria-pressed="false">EN</button>
+  </div>
+</div></header>
+
+<div class="frame">
+  <aside class="route" aria-label="Route map">
+    <svg viewBox="0 0 220 600" id="map" role="img" aria-label="Zig Zag route: Clarence, Top Points, Bottom Points, workshop">
+      <path class="sleepers" d="M40 40 L190 250 L40 460 L110 555"/>
+      <path class="line" id="trk" d="M40 40 L190 250 L40 460 L110 555"/>
+      <text class="rev" x="150" y="290">↺ <tspan class="zh">折返</tspan><tspan class="en">REVERSE</tspan></text>
+      <text class="rev" x="52" y="500">↺ <tspan class="zh">折返</tspan><tspan class="en">REVERSE</tspan></text>
+      <g class="stn" data-go="c0" tabindex="0" role="link"><circle cx="40" cy="40" r="8"/><text x="56" y="44">Clarence</text></g>
+      <g class="stn" data-go="c2" tabindex="0" role="link"><circle cx="190" cy="250" r="8"/><text x="176" y="236" text-anchor="end">Top Points</text></g>
+      <g class="stn" data-go="c5" tabindex="0" role="link"><circle cx="40" cy="460" r="8"/><text x="56" y="452">Bottom Points</text></g>
+      <g class="stn" data-go="c6" tabindex="0" role="link"><circle cx="110" cy="555" r="6"/><text x="124" y="560"><tspan class="zh">機廠</tspan><tspan class="en">Workshop</tspan></text></g>
+      <g class="train" id="train"><rect x="-11" y="-6" width="22" height="12" rx="2"/><rect class="cab" x="5" y="-6" width="6" height="12" rx="1"/></g>
+      <text class="here" id="here" x="0" y="596"></text>
+    </svg>
+  </aside>
+
+  <main id="main">
+<!-- 0 -->
+<section class="ch hero" id="c0" data-at="0">
+  <div class="ticket">
+    <div class="main">
+      <div class="from">Clarence → Top Points → Bottom Points</div>
+      <h1><span class="zh">之字形鐵路上的人</span><span class="en">The People of the Zig Zag</span></h1>
+      <p class="lede"><span class="zh">一條 1869 年通車、1910 年廢棄，又在 1975 年被一群鐵道迷救回來的山線。這趟車沿著它的折返路線往下開，沿途聽 14 位志工與員工說：一條文化資產鐵路，到底在保存什麼。</span><span class="en">A mountain line opened in 1869, abandoned in 1910, and rescued in 1975 by a group of railway enthusiasts. This train follows its switchbacks down the mountain. Along the way, 14 volunteers and staff explain what a heritage railway is really preserving.</span></p>
+      <a class="board" href="#c1"><span class="zh">上車</span><span class="en">All aboard</span> ↓</a>
+    </div>
+    <div class="stub">
+      <div><strong>3'6"</strong><span class="zh">1067 mm 軌距</span><span class="en">1067 mm gauge</span></div>
+      <div><strong>3658 ft</strong>Summit · <span class="zh">海拔約 1115 公尺</span><span class="en">about 1115 m</span></div>
+      <div>2026.07.22 – 08.05<br><span class="zh">實習紀錄</span><span class="en">Internship record</span><br>羅聖皓 Sheng Hao Lo</div>
+    </div>
+  </div>
+  <figure class="ph lead-ph"><img src="s0-panorama.jpg" alt="" width="1600" height="1200"><figcaption class="cap"><span class="zh">從觀景台看下去，山壁上有兩層鐵路：上層是沿著砂岩崖壁的石造高架橋，下層是彎過草地的軌道。同一列火車會先後經過這兩層。</span><span class="en">From the lookout you can see two levels of railway on the hillside: above, a stone viaduct along the sandstone cliff; below, a track curving across the grass. The same train passes both, one after the other.</span></figcaption></figure>
+  <div class="grid2">
+    <figure class="ph"><img loading="lazy" src="s0-sign-43.jpg" alt="" width="1200" height="900"><figcaption class="cap"><span class="zh">Clarence 是全線最高點，站牌寫著海拔 3658 呎。接下來的路，都是下坡。</span><span class="en">Clarence is the highest point on the line. The sign says 3658 feet above sea level. From here on, it is all downhill.</span></figcaption></figure>
+    <figure class="ph"><img loading="lazy" src="s0-station.jpg" alt="" width="1600" height="1200"><figcaption class="cap"><span class="zh">Clarence 車站。軌道往前延伸，進入 Clarence 隧道後開始下山。</span><span class="en">Clarence station. The track runs ahead into the Clarence Tunnel, where the descent begins.</span></figcaption></figure>
+  </div>
+</section>
+
+<!-- 1 -->
+<section class="ch" id="c1" data-at="0.12">
+  <div class="stop"><b>01</b> Clarence → Clarence Tunnel</div>
+  <figure class="ph lead-ph"><img loading="lazy" src="s1-depart.jpg" alt="" width="1600" height="1200"><figcaption class="cap"><span class="zh">All Aboard! 車門關上之前。Clarence，準備往下開。</span><span class="en">All Aboard! Before the doors close. Clarence, ready to head down.</span></figcaption></figure>
+  <h2><span class="zh">41 年的幹線，50 年的觀光鐵路</span><span class="en">41 years as a main line, 50 years as a tourist railway</span></h2>
+  <p class="lede"><span class="zh">「扣掉中間關閉的時間，它當觀光景點的時間已經比當幹線還長。」——前董事長 Lee</span><span class="en">“Even taking out the years it was closed, it has now been a tourist attraction for longer than it was a main line.” — Lee, former Chairman</span></p>
+  <ol class="tl" id="tl"></ol>
+  <p class="note"><span class="zh">年代與事件整理自 Lee 訪談（2026）；1901 年事故取自 Lithgow「Furnace Fire &amp; Forge Heritage Trail」解說牌。舊照片為 Zig Zag Railway 檔案。</span><span class="en">Dates and events are from the interview with Lee (2026). The 1901 accident is from the Lithgow “Furnace Fire &amp; Forge Heritage Trail” sign. Old photos are from the Zig Zag Railway archive.</span></p>
+</section>
+
+<!-- 2 -->
+<section class="ch" id="c2" data-at="0.33">
+  <div class="stop"><b>02</b> Top Points · <span class="zh">第一次折返</span><span class="en">First reversal</span></div>
+  <div class="grid2">
+    <figure class="ph"><img loading="lazy" src="s2-rock.jpg" alt="" width="1600" height="1200"><figcaption class="cap"><span class="zh">Top Points 月台旁的砂岩巨石。</span><span class="en">The sandstone boulder beside the Top Points platform.</span></figcaption></figure>
+    <figure class="ph"><img loading="lazy" src="s2-signalbox.jpg" alt="" width="1600" height="1200"><figcaption class="cap"><span class="zh">黃色的 Top Points 號誌樓，道岔的連桿從底下伸出去。</span><span class="en">The yellow Top Points signal box. The rodding to the points runs out from underneath.</span></figcaption></figure>
+  </div>
+  <h2><span class="zh">為什麼是「之字形」？</span><span class="en">Why a “zigzag”?</span></h2>
+  <p class="lede"><span class="zh">火車爬不上太陡的坡，所以路線在山壁上來回切。到了盡頭，火車停下、換方向，機車換到另一頭，再往下一段開。不是環狀線，也不是迴圈。</span><span class="en">A train can't climb a slope that is too steep, so the line cuts back and forth across the hillside. At the end of each leg, the train stops and changes direction, the engine moves to the other end, and the train runs the next leg. It isn't a loop, and it isn't a circle.</span></p>
+
+  <div class="demo">
+    <div class="svgwrap">
+    <svg viewBox="0 0 640 360" id="zz" role="img" aria-label="Animation: a train runs down the zigzag, reversing at Top Points; the 1910 main line runs alongside through tunnels">
+      <path d="M0 360 L0 70 Q150 20 330 40 T640 120 L640 360 Z" fill="color-mix(in srgb,var(--euc) 12%,transparent)"/>
+      <path id="ml" d="M0 334 C200 322 420 272 640 212" fill="none" stroke="var(--blue)" stroke-width="3" stroke-dasharray="9 6"/>
+      <g id="mlTrain"></g>
+      <path id="leg1" d="M70 50 L540 160 L598.4 173.7" fill="none" stroke="var(--track)" stroke-width="3.5"/>
+      <path id="leg2" d="M598.4 173.7 L540 160 L100 280 L51.8 293.2" fill="none" stroke="var(--track)" stroke-width="3.5"/>
+      <circle cx="70" cy="50" r="6" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.5"/>
+      <circle cx="540" cy="160" r="6" fill="var(--sand)"/>
+      <circle cx="100" cy="280" r="6" fill="var(--sand)"/>
+      <text x="84" y="40" font-size="14" font-family="Big Shoulders Display,Arial Narrow,sans-serif" font-weight="800" fill="var(--ink)" letter-spacing=".06em">CLARENCE</text>
+      <text x="596" y="148" text-anchor="middle" font-size="14" font-family="Big Shoulders Display,Arial Narrow,sans-serif" font-weight="800" fill="var(--ink)" letter-spacing=".06em">TOP POINTS</text>
+      <text x="112" y="300" font-size="14" font-family="Big Shoulders Display,Arial Narrow,sans-serif" font-weight="800" fill="var(--ink)" letter-spacing=".06em">BOTTOM POINTS</text>
+      <text x="6" y="322" font-size="12" font-family="IBM Plex Mono,monospace" fill="var(--blue)"><tspan class="zh">← 往雪梨</tspan><tspan class="en">← To Sydney</tspan></text>
+      <text x="636" y="264" text-anchor="end" font-size="12" font-family="IBM Plex Mono,monospace" fill="var(--blue)"><tspan class="zh">往 Lithgow →</tspan><tspan class="en">To Lithgow →</tspan></text>
+      <text x="200" y="350" font-size="11" font-family="IBM Plex Mono,monospace" fill="var(--blue)"><tspan class="zh">現役幹線：雪梨—Lithgow（1910 年起，十座隧道）</tspan><tspan class="en">Main line in service: Sydney–Lithgow (Ten Tunnels, 1910)</tspan></text>
+      <g id="zzT"></g>
+    </svg>
+    </div>
+    <div class="ctl">
+      <button class="chip" type="button" id="zzPause" aria-pressed="false"><span class="zh">暫停</span><span class="en">Pause</span></button>
+      <div class="say" id="zzSay" aria-live="polite"></div>
+    </div>
+    <div class="legend"><span><i></i><span class="zh">1869 年的之字形，今天的觀光鐵路</span><span class="en">The 1869 zigzag, today's tourist railway</span></span><span><i class="dash"></i><span class="zh">1910 年的十隧道幹線</span><span class="en">The 1910 Ten Tunnels main line</span></span></div>
+  </div>
+  <p><span class="zh">1869 年起，火車在這裡下坡、停車、換方向，機車換到另一頭，再開下一段。1910 年起，幹線改走旁邊的十座隧道，至今仍是雪梨往 Lithgow 的主要路線；之字形則留給了觀光列車。</span><span class="en">From 1869, trains came down here, stopped and changed direction; the engine moved to the other end, and the train ran the next leg. From 1910, the main line took the ten tunnels alongside instead, and it is still the main route from Sydney to Lithgow. The zigzag was left to the tourist trains.</span></p>
+
+  <details class="qa"><summary><span class="zh">為什麼不直接挖隧道？</span><span class="en">Why not just dig a tunnel?</span></summary><p><span class="zh">1860 年代不是沒有技術，而是挖隧道的時間、人力和成本都太高。設計者 John Whitton 據說參考了其他國家的之字形鐵路。1910 年，襯砌隧道用的磚可以大量生產了，新的十隧道路線才在旁邊開通。</span><span class="en">In the 1860s the technology existed; the time, labour and cost of tunnelling were simply too high. The designer, John Whitton, is said to have drawn on zigzag railways in other countries. By 1910 the bricks used to line tunnels could be mass-produced, and the new Ten Tunnels line was opened alongside.</span></p></details>
+  <details class="qa"><summary><span class="zh">為什麼軌距是 3 呎 6 吋，不是原本的標準軌？</span><span class="en">Why is the gauge 3 ft 6 in, not the original standard gauge?</span></summary><p><span class="zh">1970 年代合作社成立時，新南威爾斯州緊抓著車輛不放；昆士蘭和南澳願意賣，而兩州都用 3 呎 6 吋窄軌，所以整條線就改成窄軌。</span><span class="en">When the co-operative was formed in the 1970s, New South Wales held on tightly to its rolling stock. Queensland and South Australia were willing to sell, and both used 3 ft 6 in narrow gauge, so the whole line was converted to narrow gauge.</span></p></details>
+
+  <div class="sub"><span class="zh">小遊戲</span><span class="en">Mini-game</span></div>
+  <h3 style="font-size:22px"><span class="zh">你來當號誌員，把機車換到另一頭</span><span class="en">Be the signaller and run the engine around</span></h3>
+  <p style="margin-top:8px"><span class="zh">火車到了折返點要往回開，可是機車還在車隊的「前面」。它靠的是兩條並行的軌道，繞到車廂的另一頭。拉下操作桿、開動機車，試試看。</span><span class="en">At a reversing point the train needs to head back, but the engine is still at the “front” of the train. It uses two parallel tracks to get round to the other end of the carriages. Pull the levers and drive the engine to try it.</span></p>
+
+  <div class="game" id="game">
+    <div class="top">
+      <div class="count" id="gCount"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="chip" type="button" id="gDemo"><span class="zh">看示範</span><span class="en">Watch the demo</span></button>
+        <button class="chip" type="button" id="gHint"><span class="zh">提示</span><span class="en">Hint</span></button>
+        <button class="chip" type="button" id="gReset"><span class="zh">重來</span><span class="en">Start again</span></button>
+      </div>
+    </div>
+    <div class="yard">
+      <svg viewBox="0 0 640 170" id="yard" role="img" aria-label="Track diagram: a single line splits into Road A beside the platform and Road B, then joins again">
+        <rect class="plat" x="200" y="128" width="250" height="14"/>
+        <text x="325" y="160" text-anchor="middle"><tspan class="zh">月台</tspan><tspan class="en">Platform</tspan></text>
+        <path class="rail" d="M10 115 L130 115"/>
+        <path class="rail" d="M520 115 L630 115"/>
+        <path class="rail" d="M160 115 L490 115"/>
+        <path class="rail" d="M175 55 L475 55"/>
+        <path class="rail" id="p4A" d="M130 115 L160 115"/>
+        <path class="rail" id="p4B" d="M130 115 L175 55"/>
+        <path class="rail" id="p3A" d="M490 115 L520 115"/>
+        <path class="rail" id="p3B" d="M475 55 L520 115"/>
+        <text class="lbl" x="214" y="139">A</text>
+        <text class="lbl" x="320" y="47">B</text>
+        <text x="118" y="140" text-anchor="middle">4</text>
+        <text x="530" y="140" text-anchor="middle">3</text>
+        <g id="sigRear"><line x1="100" y1="88" x2="100" y2="110" stroke="var(--track)" stroke-width="2"/><circle cx="100" cy="82" r="7" stroke="var(--track)" stroke-width="1.5"/><text x="100" y="70" text-anchor="middle">6</text></g>
+        <g id="sigFront"><line x1="550" y1="88" x2="550" y2="110" stroke="var(--track)" stroke-width="2"/><circle cx="550" cy="82" r="7" stroke="var(--track)" stroke-width="1.5"/><text x="550" y="70" text-anchor="middle">1</text></g>
+        <g id="cars"></g>
+        <g id="loco"><rect x="-17" y="-9" width="34" height="18" rx="2" fill="var(--red)"/><rect x="5" y="-9" width="10" height="18" rx="1" fill="var(--ink)"/></g>
+        <text x="14" y="135"><tspan class="zh">← 單線</tspan><tspan class="en">← Single line</tspan></text>
+        <text x="626" y="135" text-anchor="end"><tspan class="zh">盡頭 →</tspan><tspan class="en">Dead end →</tspan></text>
+      </svg>
+    </div>
+    <div class="msg" id="gMsg" aria-live="polite"></div>
+    <div class="frameL" id="levers"></div>
+    <div class="engine">
+      <button class="chip" type="button" id="gRev">← <span class="zh">後退</span><span class="en">Reverse</span></button>
+      <button class="chip" type="button" id="gFwd"><span class="zh">前進</span><span class="en">Forward</span> →</button>
+      <button class="chip" type="button" id="gCpl"></button>
+    </div>
+    <div class="gamecols">
+      <div>
+        <div class="sub" style="margin-top:4px"><span class="zh">八個步驟</span><span class="en">The eight steps</span></div>
+        <ol class="steps" id="gSteps"></ol>
+      </div>
+      <div>
+        <div class="sub" style="margin-top:4px"><span class="zh">簡化操作表</span><span class="en">Simplified working table</span></div>
+        <table class="opt">
+          <thead><tr><th><span class="zh">路線</span><span class="en">Route</span></th><th><span class="zh">拉桿順序</span><span class="en">Lever order</span></th></tr></thead>
+          <tbody>
+            <tr><td><span class="zh">A 軌 → 前端盡頭</span><span class="en">Road A → front dead end</span></td><td class="mono">2 → 1</td></tr>
+            <tr><td><span class="zh">前端盡頭 → B 軌</span><span class="en">Front dead end → Road B</span></td><td class="mono">3 → 2 → 1</td></tr>
+            <tr><td><span class="zh">B 軌 → 後端單線</span><span class="en">Road B → rear single line</span></td><td class="mono">4 → 5 → 6</td></tr>
+            <tr><td><span class="zh">後端單線 → A 軌</span><span class="en">Rear single line → Road A</span></td><td class="mono"><span class="zh">4 放回</span><span class="en">4 back</span> → 5 → 6</td></tr>
+          </tbody>
+        </table>
+        <p class="cap"><span class="zh">要改道岔，先依相反順序放回紅、藍桿。這是簡化的教學遊戲，拉桿的順序與顏色參考號誌樓的一般原理，不是 Top Points 的實際操作表。</span><span class="en">To change points, first put back the red and blue levers in reverse order. This is a simplified teaching game. The lever order and colours follow how signal boxes generally work; it is not the actual Top Points working diagram.</span></p>
+      </div>
+    </div>
+  </div>
+  <p><span class="zh">每一次切換道岔，都是號誌樓裡有人依順序拉下操作桿。</span><span class="en">Every time the points change, someone in the signal box has pulled the levers in the right order.</span></p>
+  <div class="grid3">
+    <figure class="ph"><img loading="lazy" src="s2-tunnel.jpg" alt="" width="1200" height="900"><figcaption class="cap"><span class="zh">柴油機車駛進 Top Points。兩條軌道在這裡匯合，機車要換到列車的另一頭，靠的就是這兩條軌道之間的切換。</span><span class="en">A diesel locomotive running into Top Points. The two tracks join here. Switching between them is how the engine gets to the other end of the train.</span></figcaption></figure>
+    <figure class="ph"><img loading="lazy" src="s2-points.jpg" alt="" width="1600" height="1200"><figcaption class="cap"><span class="zh">號誌樓前的道岔。現在大多數鐵路的道岔都是電動的，這裡卻仍然靠人力，從號誌樓拉桿、經過地上的連桿把道岔推過去。</span><span class="en">The points in front of the signal box. Most railways now use powered points, but here they are still worked by hand: a lever in the signal box pushes the points over through rodding along the ground.</span></figcaption></figure>
+    <figure class="ph"><img loading="lazy" src="s2-diagram.jpg" alt="" width="1600" height="1200"><figcaption class="cap"><span class="zh">Top Points 號誌樓的操作表。每條路線要拉哪幾支、什麼順序，都寫在這張表上；順序不對，操作桿就拉不動。</span><span class="en">The working diagram in the Top Points signal box. Which levers to pull for each route, and in what order, is written on this chart. Pull them in the wrong order and the levers won't move.</span></figcaption></figure>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="ch" id="c3" data-at="0.36">
+  <div class="stop"><b>03</b> <span class="zh">Top Points 月台</span><span class="en">Top Points platform</span></div>
+  <h2><span class="zh">鐵路上的人</span><span class="en">The people of the railway</span></h2>
+  <p class="lede"><span class="zh">14 人中，8 人從小或青少年時就認識 Zig Zag；6 人的加入跟家人有關。點一張卡片，看他們為什麼來。</span><span class="en">Of the 14 people, 8 knew the Zig Zag as children or teenagers, and 6 joined because of family. Tap a card to see why they came.</span></p>
+  <div class="filters" id="flt" role="group" aria-label="Filter"></div>
+  <div class="people" id="people"></div>
+  <p class="note"><span class="zh">加入時間以訪談時（2026 年 7–8 月）受訪者說的年資推算，標「約」的年份為推估。</span><span class="en">Joining dates are worked out from how long each person said they had been involved at the time of the interviews (July–August 2026). Years marked “about” are approximate.</span></p>
+</section>
+
+<!-- 4 -->
+<section class="ch" id="c4" data-at="0.55">
+  <div class="stop"><b>04</b> Middle Road · <span class="zh">經過高架橋</span><span class="en">Over the viaduct</span></div>
+  <figure class="ph lead-ph"><img loading="lazy" src="s4-header.jpg" alt="" width="1600" height="1200"><figcaption class="cap"><span class="zh">往山谷裡看，底下有電車線的雙軌，就是今天雪梨往 Lithgow 的幹線。</span><span class="en">Look down into the valley: the electrified double track below is today's main line from Sydney to Lithgow.</span></figcaption></figure>
+  <h2><span class="zh">從入會到開蒸汽火車</span><span class="en">From joining up to driving steam</span></h2>
+  <p class="lede"><span class="zh">在 Zig Zag，志工和支薪員工走同一條升級路徑。所有人從基礎做起，以能力為準一格一格解鎖，沒有固定時數。點亮下一格試試看。</span><span class="en">At the Zig Zag, volunteers and paid staff follow the same path. Everyone starts at the bottom and unlocks each step by competence, not by hours. Try lighting up the next step.</span></p>
+  <div class="tree">
+    <svg viewBox="0 0 420 470" id="tree" role="group" aria-label="Skill tree"></svg>
+    <div class="panel" id="panel" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="ch" id="c5" data-at="0.72">
+  <div class="stop"><b>05</b> Bottom Points · <span class="zh">第二次折返</span><span class="en">Second reversal</span></div>
+  <h2><span class="zh">一條文化資產鐵路，到底在保存什麼？</span><span class="en">What is a heritage railway actually preserving?</span></h2>
+  <p class="lede"><span class="zh">我問了每一位受訪者同一個問題。大家第一個想到的多半是高架橋與隧道，但幾乎每個人都會再補上一個看不見的答案。點開每個主題看看。</span><span class="en">I asked everyone I interviewed the same question. Most first thought of the viaducts and tunnels, but almost everyone then added an answer you can't see. Open each topic to find out.</span></p>
+  <div class="keeps" id="keeps"></div>
+  <figure class="ph" style="margin-top:28px;max-width:860px"><img loading="lazy" src="bp-levers.jpg" alt="" width="1280" height="960"><figcaption class="cap"><span class="zh">Bottom Points 號誌樓。窗台上有一個凹痕，是歷代號誌員坐出來的；新蓋的 Top Points 號誌樓就沒有。</span><span class="en">The Bottom Points lever frame. There is a dip worn into the windowsill by generations of signallers sitting there. The newly built Top Points signal box doesn't have one.</span></figcaption></figure>
+</section>
+
+<!-- 6 -->
+<section class="ch" id="c6" data-at="1">
+  <div class="stop"><b>06</b> Bottom Points · <span class="zh">機廠</span><span class="en">The workshop</span></div>
+  <figure class="ph lead-ph"><img loading="lazy" src="s6-shed.jpg" alt="" width="1600" height="1200"></figure>
+  <h2><span class="zh">每一輛火車、每一節車廂的家</span><span class="en">Home to every locomotive and carriage</span></h2>
+  <p class="lede"><span class="zh">鐵路要每天開車，靠的不只是司機和號誌員。在山谷最底下的 Bottom Points 機廠，每一輪、每一扇窗、每一台機車，都有人一樣一樣檢查、拆下來修。實習期間，我在這裡跟著機廠的志工一起做了這些事。</span><span class="en">Running trains every day takes more than drivers and signallers. At the Bottom Points workshop, at the very bottom of the valley, every wheel, every window and every locomotive is checked, taken apart and repaired, one by one. During my internship, I worked here alongside the workshop volunteers.</span></p>
+  <div class="jobs">
+    <article class="job">
+      <div class="pics"><figure class="ph"><img loading="lazy" src="s6-entry.jpg" alt="" width="1600" height="1200"></figure></div>
+      <div><div class="n">01</div><h3><span class="zh">機車進廠：先把油清乾淨</span><span class="en">Into the workshop: clean up the oil first</span></h3>
+      <p><span class="zh">蒸汽機車從這條軌道開進機廠，停在檢修坑上方，工作人員可以站進坑裡從底下檢查。機車進廠後，從引擎裡清出來的油會留在地上。我們撒上專用的吸油材料，把油吸乾後再掃起來：這樣比較好清理，人不會滑倒，油污也不會卡在軌道中間。</span><span class="en">Steam locomotives run into the workshop on this track and stop over the inspection pit, so the crew can stand in the pit and inspect from underneath. Once a loco is in, the oil cleaned out of the engine is left on the floor. We spread a special absorbent, let it soak up the oil, then sweep it up. It makes cleaning easier, nobody slips, and the oil doesn't get stuck between the rails.</span></p></div>
+    </article>
+    <article class="job">
+      <div class="pics"><figure class="ph"><img loading="lazy" src="s6-wheel.jpg" alt="" width="1600" height="1200"></figure><figure class="ph"><img loading="lazy" src="s6-bogie.jpg" alt="" width="1600" height="1200"></figure></div>
+      <div><div class="n">02</div><h3><span class="zh">輪子的磨耗：用量規一個一個量</span><span class="en">Wheel wear: measured one by one with gauges</span></h3>
+      <p><span class="zh">火車的車輪不是平的，內側有一圈凸起的「輪緣」，靠它卡住鐵軌、不讓車輪滑出去。輪子每天在鐵軌上磨，輪緣會變薄、變高，輪面也會磨出凹槽。我們用特定的量規一項一項量，超過標準就要重新車削或更換。</span><span class="en">Train wheels aren't flat. On the inside is a raised rim, the flange, which keeps the wheel on the rail. As wheels roll on the rails every day, the flange gets thinner and taller, and a hollow wears into the tread. We measure each item with a specific gauge; anything beyond the limit has to be re-turned or replaced.</span></p>
+      <ul class="limits">
+        <li><span><span class="zh">輪輞厚度</span> Rim Thickness</span><b>≥ 22 mm</b></li>
+        <li><span><span class="zh">輪緣厚度</span> Flange Thickness</span><b>≥ 19 mm</b></li>
+        <li><span><span class="zh">輪緣高度</span> Flange Height</span><b>≤ 36 mm</b></li>
+        <li><span><span class="zh">踏面凹陷</span> Tread Hollow</span><b>≤ 3 mm</b></li>
+        <li><span><span class="zh">輪緣稜角</span> Arris</span><b>≤ 1.5 mm</b></li>
+      </ul>
+      <p><span class="zh">也就是說，該厚的地方不能磨得太薄，會越磨越大的地方不能超過上限。照片裡那組拆下來的轉向架，輪面剛車削過，還閃著金屬光。</span><span class="en">In other words, the parts that should be thick must not wear too thin, and the measures that grow with wear must not pass their limit. The bogie in the photo has freshly turned treads, still bright bare metal.</span></p></div>
+    </article>
+    <article class="job">
+      <div class="pics"><figure class="ph"><img loading="lazy" src="s6-window.jpg" alt="" width="1600" height="1200"></figure></div>
+      <div><div class="n">03</div><h3><span class="zh">車廂裡的大小事：窗戶、座椅、電箱、太陽能板</span><span class="en">Inside the carriages: windows, seats, electrical boxes, solar panels</span></h3>
+      <p><span class="zh">乘客碰得到的每一樣東西，都會在機廠檢查：卡住的木窗要拆下來整修、上漆，破損的座椅要換皮，車上的電箱也要定期檢查。每節車廂的車頂都有自己的太陽能板，專門供電給那節車廂裡的燈。這些木造車廂大多有幾十年的歷史，修的時候要盡量保留原本的樣子。</span><span class="en">Everything passengers touch is checked in the workshop. Sticking timber windows are removed, restored and repainted, damaged seats are re-covered, and each carriage's electrical box is inspected regularly. Every carriage has its own solar panel on the roof, powering that carriage's lights. Most of these timber carriages are decades old, so repairs keep as much of their original character as possible.</span></p></div>
+    </article>
+    <article class="job">
+      <div class="pics"><figure class="ph"><img loading="lazy" src="s6-shed.jpg" alt="" width="1600" height="1200"></figure></div>
+      <div><div class="n">04</div><h3><span class="zh">還在等待的車：翻修中的機車與車廂</span><span class="en">Still waiting: locomotives and carriages under restoration</span></h3>
+      <p><span class="zh">機廠裡停著好幾台正在翻修的蒸汽機車和車廂，有些是從外地買回來的二手車。它們現在還不能上路，但都會一台一台修好，放回軌道上運行。對志工來說，這些車代表的是未來：可運行的車越多，每天能開的班次就越多。</span><span class="en">Several steam locomotives and carriages are in the workshop being restored, some bought second-hand from elsewhere. They can't run yet, but each will be repaired and returned to service in turn. For the volunteers these vehicles are the future: the more stock that can run, the more trains can run each day.</span></p></div>
+    </article>
+  </div>
+  <div class="why">
+    <h3><span class="zh">機廠為什麼在山下？</span><span class="en">Why is the workshop at the bottom of the hill?</span></h3>
+    <p><span class="zh">Bottom Points 機廠沒有道路直達，也沒有天車，重零件要靠火車運下山；每天早上，還要把空車開上 Clarence 才能載客。當初蓋在這裡，是因為合作社那時還沒有 Clarence 的土地。2013 年的林火也燒毀了這裡的夾層。不少志工希望，未來能在 Clarence 蓋一座新機廠。</span><span class="en">The Bottom Points workshop has no road access and no overhead crane, so heavy parts have to come down the mountain by train, and every morning the empty train has to run up to Clarence before it can carry passengers. It was built here because, at the time, the co-operative didn't yet have land at Clarence. The 2013 bushfire also destroyed the mezzanine here. Many volunteers hope a new workshop can one day be built at Clarence.</span></p>
+    <blockquote class="pull"><span class="zh">「我們只是保管人。」</span><span class="en">“We are only custodians.”</span><cite><span class="zh">機廠主管 Michael</span><span class="en">Michael, workshop manager</span></cite></blockquote>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="ch" id="c7" data-at="0.5">
+  <div class="stop"><b>07</b> <span class="zh">回程</span><span class="en">The return trip</span> · 1989 / 2026</div>
+  <h2><span class="zh">35 年前的問題，現在解決了嗎？</span><span class="en">Thirty-five years on, have the old questions been answered?</span></h2>
+  <p class="lede"><span class="zh">1989 年，環境科學家 Jim Longworth 在 Zig Zag 的月台上訪問了 256 位候車遊客，並在 1991 年發表了研究。2026 年，我訪問了 14 位志工與員工。把兩邊的話放在一起，可以看到哪些事沒變、哪些已經不一樣了。</span><span class="en">In 1989, environmental scientist Jim Longworth surveyed 256 visitors waiting on the Zig Zag platforms, and published his study in 1991. In 2026, I interviewed 14 volunteers and staff. Putting the two side by side shows what hasn't changed and what has.</span></p>
+  <div class="sub"><span class="zh">1989 年問卷</span><span class="en">1989 survey</span></div>
+  <div class="nums">
+    <div><b>61%</b><span><span class="zh">對鐵路本身沒有興趣</span><span class="en">had no interest in railways as such</span></span></div>
+    <div><b>74%</b><span><span class="zh">是第一次來</span><span class="en">were first-time visitors</span></span></div>
+    <div><b>65%</b><span><span class="zh">來自雪梨</span><span class="en">came from Sydney</span></span></div>
+    <div><b>39%</b><span><span class="zh">專程為 Zig Zag 來藍山</span><span class="en">came to the Blue Mountains specifically for the Zig Zag</span></span></div>
+  </div>
+  <div class="pairs" id="pairs"></div>
+  <p class="concl"><span class="zh">35 年前，Longworth 用 1869–1910 年的樣子來判斷「真不真」。今天的志工則告訴我，這 50 年的重建、關閉與重生，也是這條鐵路的歷史。真實性的定義，會隨時間改變。</span><span class="en">Thirty-five years ago, Longworth judged what was “real” by how the line looked in 1869–1910. Today's volunteers told me that these 50 years of rebuilding, closure and revival are also the railway's history. What counts as authentic changes over time.</span></p>
+  <p class="note"><span class="zh">資料來源：</span><span class="en">Source: </span>Longworth, J. (1991). Preserving the Iron Horse. <i>Australian Planner</i>, 29(2), 83–87. <span class="zh">數字只用內文寫明的部分。</span><span class="en">Only figures stated in the text are used.</span></p>
+</section>
+
+<!-- 8 -->
+<section class="ch" id="c8" data-at="0">
+  <div class="stop"><b>08</b> <span class="zh">回到 Clarence</span><span class="en">Back to Clarence</span></div>
+  <h2><span class="zh">下一站在哪裡？</span><span class="en">Where's the next stop?</span></h2>
+  <p class="lede"><span class="zh">我請每個人描述他們理想中的 Zig Zag。願景大小不同，背後是同一件事：希望這條鐵路繼續存在，而且變得更好。點開每個願景，看看他們想像的未來。</span><span class="en">I asked everyone to describe their ideal Zig Zag. The visions differ in size, but behind them is the same wish: that this railway keeps going, and gets better. Open each vision to see the future they imagine.</span></p>
+  <ul class="vis" id="vis"></ul>
+</section>
+
+<!-- footer -->
+<footer class="thanks" id="c9" data-at="0">
+  <figure class="ph big"><img loading="lazy" src="s8-intern-7.jpg" alt="" width="1600" height="1200"></figure>
+  <div class="grid3">
+    <figure class="ph"><img loading="lazy" src="s8-intern-1.jpg" alt="" width="1600" height="1200"></figure>
+    <figure class="ph"><img loading="lazy" src="s8-intern-2.jpg" alt="" width="1600" height="1200"></figure>
+    <figure class="ph"><img loading="lazy" src="s8-intern-3.jpg" alt="" width="1600" height="1200"></figure>
+    <figure class="ph"><img loading="lazy" src="s8-intern-4.jpg" alt="" width="1600" height="1200"></figure>
+    <figure class="ph"><img loading="lazy" src="s8-intern-5.jpg" alt="" width="1600" height="1200"></figure>
+    <figure class="ph"><img loading="lazy" src="s8-intern-6.jpg" alt="" width="1600" height="1200"></figure>
+  </div>
+  <h2><span class="zh">兩週，謝謝你們</span><span class="en">Two weeks. Thank you.</span></h2>
+  <p class="lede"><span class="zh">謝謝 Zig Zag Railway 的每一位志工與員工。這兩週，你們讓我上車、進號誌樓、下檢修坑，也耐心回答我的每一個問題。謝謝每一位願意受訪的人，這個網頁裡的每一段話都來自你們。</span><span class="en">Thank you to every volunteer and staff member at Zig Zag Railway. For two weeks you let me ride the trains, step into the signal box and climb down into the inspection pit, and you patiently answered every one of my questions. Thank you to everyone who agreed to be interviewed. Every word on this page comes from you.</span></p>
+  <div class="disc"><p><span class="zh">本網頁為羅聖皓 Sheng Hao Lo 於 2026 年 7 月 22 日至 8 月 5 日在 Zig Zag Railway 實習期間的個人成果，並非 Zig Zag Railway 官方網站。內容整理自訪談、現場紀錄與 Longworth（1991）的研究；如有錯誤，責任在作者。第 5 區段插圖為 AI 生成示意圖。</span><span class="en">This website is a personal project by 羅聖皓 Sheng Hao Lo, produced during his internship at Zig Zag Railway from 22 July to 5 August 2026. It is not an official Zig Zag Railway website. The content is drawn from interviews, on-site notes and Longworth (1991); any errors are the author's own. The illustrations in section 5 are AI-generated.</span></p></div>
+</footer>
+  </main>
+</div>
+
+<script>
+let lang='zh';
+const root=document.documentElement;
+const T=o=>typeof o==='string'?o:(o[lang]??o.zh);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- data ---------- */
+const TL=[
+ {y:'1866',h:{zh:'開始興建',en:'Construction begins'},d:{zh:'大西部鐵路（Main Western Line）的一段，連接雪梨盆地與中西部。',en:'Part of the Main Western Line, linking the Sydney basin with the Central West.'}},
+ {y:'1869',k:1,h:{zh:'10 月通車',en:'Opened in October'},d:{zh:'John Whitton 設計、Patrick Higgins 承建。火車由這裡沿之字形下到西部台地。',en:'Designed by John Whitton and built by contractor Patrick Higgins. Trains used the zigzag to descend from here to the western tablelands.'},p:[['s1-1869-family',{zh:'早期老照片：砂岩崖壁下的小屋與一家人',en:'An early photo: a hut and a family below the sandstone cliff'}]]},
+ {y:'1901',k:1,h:{zh:'出軌事故',en:'Runaway'},d:{zh:'4 月 4 日下午，一列 37 節的貨運列車由 B 型 2542 號機車牽引，從 Clarence 隧道下坡時失控。到了 Top Points，機車衝過擋車、爬上岩石矮牆，半個車身懸在 152 公尺深的 Ida Falls 山谷上。司機和司爐及時跳車，最後用兩台機車才把它拉回來。岩石上的車輪痕跡至今仍看得到。1869–1910 年間共有三次重大事故，1908 年另一次事故中，一位列車長被掉落的羊毛包擊中身亡。',en:'On the afternoon of 4 April, a 37-wagon goods train hauled by B-class locomotive No. 2542 ran away on the descent from the Clarence Tunnel. At Top Points the engine smashed through the buffer stop and climbed the rock wall, left with half its body hanging over the 152 m Ida Falls gully. The driver and fireman jumped clear in time, and it took two locomotives to pull it back. The wheel marks can still be seen on the rock. There were three serious accidents between 1869 and 1910; in another, in 1908, a guard was killed by a falling bale of wool.'},p:[['s1-accident',{zh:'懸在崖邊的 2542 號機車（圖：Lithgow Library）',en:'Locomotive 2542 hanging over the edge (image: Lithgow Library)'}]]},
+ {y:'1910',k:1,h:{zh:'被十隧道繞過',en:'Bypassed by the Ten Tunnels'},d:{zh:'旁邊開了一條十隧道的新路線，幹線繞道而行，至今仍在使用。之字形路基閒置約 60 年，鋼軌據信在戰時被拆去當鋼材。',en:'A new line with ten tunnels opened alongside, and the main line was diverted around the zigzag. It is still in use today. The zigzag formation lay idle for about 60 years; its rails are believed to have been taken up for steel during the war.'},p:[['s1-1869-cliff',{zh:'早期老照片：崖壁下的之字形路基',en:'An early photo: the zigzag formation below the cliffs'}]]},
+ {y:{zh:'1970 年代',en:'1970s'},h:{zh:'合作社成立',en:'Co-operative founded'},d:{zh:'一群鐵道迷組成 Zig Zag Railway Co-operative。傳說他們是在病房裡認識、決定自己蓋鐵路的。',en:'A group of railway enthusiasts formed the Zig Zag Railway Co-operative. Legend says they met in a hospital ward and decided to build a railway themselves.'}},
+ {y:'1975',k:1,h:{zh:'重新開放',en:'Reopened'},d:{zh:'只開 Top Points 到 Bottom Points；遊客開車到 Top Points 上車。',en:'Trains ran only between Top Points and Bottom Points; visitors drove to Top Points to board.'}},
+ {y:'1988',h:{zh:'延伸到 Clarence',en:'Extended to Clarence'},d:{zh:'形成今天的路線。',en:"Forming today's route."}},
+ {y:'2012',k:1,h:{zh:'停止載客',en:'Passenger services stop'},d:{zh:'一起兩車相撞事故後，監管單位查出 200 多項不符合事項。Lee：當時的文化是「錢第一、安全第二」。',en:'After a collision between two trains, the regulator found more than 200 non-compliances. Lee: the culture then was “money first, safety second.”'}},
+ {y:'2013',k:1,h:{zh:'State Mine 林火',en:'State Mine bushfire'},d:{zh:'損失最大的一次：機廠夾層全毀，大量車輛與枕木燒掉。',en:'The worst loss: the workshop mezzanine was destroyed, along with many vehicles and sleepers.'},p:[['s1-2013-wall',{zh:'燒毀的機廠外牆',en:'The burnt-out workshop wall'}],['s1-2013-debris',{zh:'機廠內的殘骸',en:'Wreckage inside the workshop'}],['s1-2013-loco',{zh:'被燒過的蒸汽機車',en:'A fire-damaged steam locomotive'}],['s1-2013-railcar',{zh:'燒毀的 2016 號軌道車',en:'Rail motor 2016, burnt out'}]],pn:{zh:'檔案照，2013-10-21 拍攝',en:'Archive photos, 21 Oct 2013'}},
+ {y:'2016',h:{zh:'管理層換血',en:'New leadership'},d:{zh:'Lee 接任董事長，開始重建安全制度與組織文化。',en:'Lee became Chairman and began rebuilding the safety system and the culture.'}},
+ {y:'2019',k:1,h:{zh:'Black Summer 林火',en:'Black Summer bushfires'},d:{zh:'燒毀 Clarence 設施大樓與剛換好的枕木。',en:'The fires destroyed the Clarence facilities building and newly replaced sleepers.'},p:[['s1-fire-shed',{zh:'黃色柵欄旁燒毀的小屋',en:'A burnt hut beside the yellow fence'}],['s1-fire-cutting',{zh:'燒過的路塹與隧道',en:'The burnt cutting and tunnel'}]]},
+ {y:'2021–22',h:{zh:'全員重新受訓',en:'Everyone retrains'},d:{zh:'包括老司機在內，所有人從 Signaller 重新考起。',en:'Everyone, veteran drivers included, re-qualified from Signaller upwards.'}},
+ {y:'2023',k:1,h:{zh:'恢復認證、重新開放',en:'Accreditation restored, reopened'},d:{zh:'Lee：「關閉是發生在我們身上最好的事，它讓一切歸零。」',en:'Lee: “Closing was the best thing that ever happened to us. It reset everything.”'}},
+ {y:'2026',k:1,h:{zh:'一週七天營運',en:'Seven days a week'},d:{zh:'4 月起每天開車，多位資深志工轉為支薪員工。',en:'Trains run every day from April, and several long-time volunteers have become paid staff.'},p:[['s1-2026-platform',{zh:'Clarence 月台上的遊客',en:'Visitors on the Clarence platform'}],['s1-2026-shop',{zh:'商店櫃台',en:'The shop counter'}]]}
+];
+
+const AREAS={ops:{zh:'行車',en:'Operations'},work:{zh:'機廠',en:'Workshop'},shop:{zh:'商店與服務',en:'Shop & visitor services'},mgmt:{zh:'管理',en:'Management'}};
+const P=[
+ ['Lee','mgmt',{zh:'前董事長、前 CEO，蒸汽機車司機',en:'Former Chairman and former CEO; steam driver'},{zh:'1997 年（15 歲）',en:'1997 (aged 15)'},{zh:'1997 年他看到 3801 蒸汽機車開上藍山，跟爸爸說「能開那個一定很酷」。爸爸替他拿來入會表，他從此當了 29 年志工，花了 10 年才成為司機。現在他最想做的，是把這些年學到的教給下一代。',en:'In 1997 he saw 3801 steam up into the Blue Mountains and told his dad that driving that would be pretty cool. His dad got him a membership form, and he has volunteered for 29 years since; it took him 10 years to become a driver. What he most wants now is to pass on what he has learned to the next generation.'},{zh:'家電行銷售、電線工、電線設計師，現為電力公司企業架構師',en:'Appliance sales, electrician, electrical designer; now an enterprise architect at an electricity company'}],
+ ['Mandy','mgmt',{zh:'CEO 執行助理、代理商務經理',en:'Executive Assistant to the CEO; acting Commercial Manager'},{zh:'1997 年（青少年）',en:'1997 (as a teenager)'},{zh:'青少年時加入，年輕時當過 Fireman 和 Guard。她在這裡遇到先生，孩子也在這裡長大，鐵路對她來說是一個大家庭。當鐵路開出職缺，她覺得能在自己熱愛的地方工作是難得的機會，就應徵了。',en:'She joined as a teenager and worked as a fireman and guard when she was young. She met her husband here and her children grew up here; to her the railway is one big family. When a paid role came up, she saw a rare chance to work somewhere she loves, and applied.'},{zh:'身心障礙服務計畫管理 15 年；大學讀環境科學與觀光',en:'15 years managing disability service programs; studied environmental science and tourism'}],
+ ['Mattie','ops',{zh:'蒸汽機車司機、多職務導師',en:'Steam driver; mentor across several roles'},{zh:'1999 年（高中）',en:'1999 (in high school)'},{zh:'高中時幾乎每個週末都騎腳踏車到 Zig Zag 機廠閒晃，「煩到大家都認識我」。工作人員終於對他說：「你幾乎每週都來，乾脆加入吧。」他說自己是為火車而來，為人而留。',en:'In high school he rode his bike to the Zig Zag workshop almost every weekend and hung around, “annoying everyone until they all knew me.” Eventually the crew said, “You\'re here nearly every week, you might as well join.” He says he came for the trains and stayed for the people.'},{zh:'雪梨城際電聯車司機',en:'Intercity train driver in Sydney'}],
+ ['Aaron','ops',{zh:'行車排班員、見習司機',en:'Rostering officer; trainee driver'},{zh:'約 2005 年（高中）；2026 年起支薪',en:'About 2005 (in high school); paid since 2026'},{zh:'5 歲時第一次來搭火車，高中開始幫忙，18 歲成為 Guard。前份工作半夜常被電話吵醒，身心耗竭；轉來鐵路全職後，他說「感覺自己還是志工，不像在上班」。',en:'He first rode the train at 5, started helping in high school, and became a guard at 18. His previous job meant late-night phone calls and burnout. Since moving to the railway full time, he says it “still feels like volunteering, not like going to work.”'},{zh:'重型土方機具客服中心組長，24 小時待命約 10 年',en:'Contact-centre team leader for heavy earthmoving equipment, on call 24/7 for about 10 years'}],
+ ['Nathan','work',{zh:'機械技師、Train Controller',en:'Mechanical fitter; Train Controller'},{zh:'會員 16 年、志工 13 年；支薪 3.5 年',en:'Member 16 years, volunteer 13 years; paid for 3.5 years'},{zh:'小時候住在 Penrith 的祖父母家，整天搭這條火車、吃野餐。「要怪就怪我爸。」2013 年鐵路停運時，他和哥哥覺得好玩就來當志工，後來被 CEO 主動挖角。',en:'As a kid, staying with his grandparents in Penrith, he spent whole days riding this train and having picnics. “Blame my dad.” When the railway stopped running in 2013, he and his brother thought it would be fun to volunteer; later the CEO head-hunted him.'},{zh:'機械裝配工與車床技師',en:'Fitter and machinist'}],
+ ['Don','work',{zh:'鐵路工作員、董事',en:'Track worker; board director'},{zh:'2013 年；2026 年起全職',en:'2013; full time since 2026'},{zh:'孩子長大後有了時間，不想只坐在家看網路上別人在做什麼。加入後一週就遇上 2013 年大火，原本要修的東西全被燒掉。後來當上董事，覺得叫別人全力投入自己卻不投入不對，所以辭去工作全職投入。',en:'With his children grown up, he had time, and didn\'t want to just sit at home watching what other people were doing online. A week after he joined, the 2013 fire burnt everything he was meant to be fixing. When he became a director, he felt it wasn\'t right to ask others to give everything if he didn\'t, so he quit his job to commit full time.'},{zh:'電工 45 年，曾在職訓學校教學徒',en:'Electrician for 45 years; taught apprentices at TAFE'}],
+ ['Chris','work',{zh:'機廠技師、Signaller',en:'Workshop fitter; Signaller'},{zh:'約 2021 年',en:'About 2021'},{zh:'父母在這條鐵路認識：「沒有這條鐵路，就沒有我。」他 9–10 歲前都在鐵路邊長大，後來離開，長大後又回來。他最喜歡看到新志工從 Signaller 一路升到 Fireman。',en:'His parents met on this railway: “Without this railway, there\'d be no me.” He grew up beside the line until he was 9 or 10, moved away, and came back as an adult. His favourite thing is watching new volunteers work their way up from signaller to fireman.'},{zh:'蒸汽機車修復工程公司；曾在人家後院蓋迷你鐵道',en:'Steam locomotive restoration engineering firm; once built miniature railways in people\'s backyards'}],
+ ['Michael','work',{zh:'機廠主管、見習 Fireman',en:'Workshop manager; trainee fireman'},{zh:'約 2023–2024 年；2026 年起全職',en:'About 2023–24; full time since 2026'},{zh:'想找一件能和 10 歲兒子一起做的事。一個人都不認識，卻被熱情接納；兒子現在會跟著上車幫忙開門、賣票。換工作前，他特地追問了經營計畫，確認鐵路能長久經營。',en:'He was looking for something to do with his 10-year-old son. He didn\'t know anyone, but was welcomed warmly; his son now rides along, helping open doors and sell tickets. Before changing jobs, he asked about the business plan to make sure the railway had a long-term future.'},{zh:'礦坑服務技師、採石場主管',en:'Mine services technician; quarry supervisor'}],
+ ['John','ops',{zh:'Signaller、Guard、檔案數位化',en:'Signaller, guard, archive digitisation'},{zh:'約 2022 年；2026 年起全職',en:'About 2022; full time since 2026'},{zh:'帶 5 歲的兒子來搭車後決定加入。他說自己愛的不是火車，而是歷史。在保險公司覺得自己可有可無；在這裡，他不來上班，火車就開不了。',en:'He decided to join after bringing his 5-year-old son for a ride. He says it isn\'t trains he loves, it\'s history. At the insurance company he felt replaceable; here, if he doesn\'t turn up, the train can\'t run.'},{zh:'保險公司',en:'Insurance company'}],
+ ['Jim','work',{zh:'機械技師、Signaller、Guard',en:'Mechanical fitter; Signaller; guard'},{zh:'約 2020 年',en:'About 2020'},{zh:'「我就是喜歡火車。」退休後在 Facebook 看到 Zig Zag，打電話來就報名了。任何有引擎的東西他都愛；留下來的原因，是大家之間的情誼和共同的目標。',en:'“I just like trains.” After retiring he saw the Zig Zag on Facebook, rang up and signed on. He loves anything with an engine; what keeps him here is the friendship and the shared goal.'},{zh:'Qantas 30 年、海軍、C-130 運輸機艦隊維修規劃',en:'30 years at Qantas; the Navy; maintenance planning for the C-130 fleet'}],
+ ['Andrew','mgmt',{zh:'營運與資產經理',en:'Operations and Asset Manager'},{zh:'2026 年',en:'2026'},{zh:'3 年前在文化資產鐵路研討會上，聽 Zig Zag 團隊介紹他們的文化與安全制度，很受感動。後來 CEO 邀他來。相比之下，他覺得原本的政府機構官僚太多、事情做不完。',en:'Three years ago, at a heritage railway conference, he heard the Zig Zag team talk about their culture and safety system and was moved by it. Later the CEO invited him to come. By comparison, he felt his government agency had too much bureaucracy and nothing ever got done.'},{zh:'墨爾本 Puffing Billy Railway 的 Fireman',en:'Fireman at Puffing Billy Railway, Melbourne'}],
+ ['Carolyn','shop',{zh:'商店與解說志工',en:'Shop and interpretation volunteer'},{zh:'2026 年',en:'2026'},{zh:'先生熱愛蒸汽火車，2024 年突然過世。她為了紀念他而來當志工。她愛的不是引擎和活塞，而是跟這條鐵路有關的人。',en:'Her husband loved steam trains and died suddenly in 2024. She volunteers in his memory. It isn\'t the engines and pistons she loves, but the people connected to this railway.'},{zh:'半退休，經營攝影工作室',en:'Semi-retired; runs a photography studio'}],
+ ['Jodieane','shop',{zh:'零售與商業營運主管',en:'Retail and Commercial Operations Manager'},{zh:'2026 年 4 月',en:'April 2026'},{zh:'回 Lithgow 照顧家人，父親過世後本打算搬走。父親愛火車，她還留著他最後一趟火車的車票。最後她留了下來，進了 Zig Zag。',en:'She came back to Lithgow to care for family and planned to move away after her father died. Her father loved trains, and she still keeps the ticket from his last train trip. In the end she stayed, and joined the Zig Zag.'},{zh:'麥當勞、David Jones 百貨、管理 14 家服飾店、鋼構廠營運主管',en:'McDonald\'s; David Jones; managed 14 clothing stores; operations manager at a steel fabrication plant'}],
+ ['Elieisha','shop',{zh:'Clarence 遊客服務與零售',en:'Clarence visitor services and retail'},{zh:'2026 年',en:'2026'},{zh:'一直喜歡火車。這份工作把她擅長的庫存管理和喜歡的火車「打包在一起」。她常常要跟遊客解釋：這條線是之字形，不是環狀線。',en:'She has always loved trains. The job “packages together” what she is good at, stock management, with what she loves, trains. She often has to explain to visitors that the line is a zigzag, not a loop.'},{zh:'寵物連鎖店店長、寵物美容師',en:'Pet store manager; dog groomer'}]
+];
+
+const TREE=[
+ {id:'join',x:210,y:30,l:{zh:'入會',en:'Join'},img:[['s4-join',{zh:'在 Zig Zag 餐車裡',en:'In the Zig Zag dining car'}]],d:{zh:'成為合作社會員，每年 40 澳元，就能收到會刊，也能報名當志工。',en:'Become a member of the co-operative for A$40 a year. You get the newsletter and can sign up to volunteer.'},q:{zh:'只要你願意花時間學，有一天就能開到蒸汽火車。',en:'If you\'re willing to put in the time to learn, one day you can drive a steam train.'},by:{zh:'Lee（大意）',en:'Lee (paraphrased)'}},
+ {id:'safety',x:210,y:100,req:'join',l:{zh:'安全訓練與體檢',en:'Safety training & medical'},img:[['tw-measure',{zh:'軌道量測',en:'Measuring the track'}]],d:{zh:'線上完成鐵路安全工作者訓練，再做體檢。志工和支薪員工完全一樣。',en:'Complete rail safety worker training online, then a medical. Exactly the same for volunteers and paid staff.'},q:{zh:'志工和支薪員工唯一的差別，是能付出多少時間。',en:'The only difference between volunteers and paid staff is how much time they can give.'},by:'Lee'},
+ {id:'section',x:330,y:170,req:'safety',l:{zh:'軌道車駕駛',en:'Track vehicle driver'},img:[['tw-patrol',{zh:'巡道車',en:'The track inspection vehicle'}]],d:{zh:'駕駛巡道車做軌道巡查與量測。',en:'Drive the track vehicle for track inspection and measurement.'},q:{zh:'我也能做軌道巡查了。',en:'I can do track inspections now too.'},by:'Jim'},
+ {id:'signal',x:150,y:170,req:'safety',l:{zh:'Signaller 號誌員',en:'Signaller'},img:[['s4-signal-staff',{zh:'拿著路牌站在蒸汽機車旁',en:'Holding the staff beside a steam locomotive'}],['s4-signal-box',{zh:'在號誌樓的拉桿架前',en:'At the lever frame in the signal box'}]],d:{zh:'在號誌樓操作號誌和道岔，交付路牌。沒有拿到路牌，列車就不能進入下一段。導師會陪你值班，確認你能獨立作業後，再由評核員考核。',en:'Work the signals and points from the signal box and hand over the staff. Without the staff, a train can\'t enter the next section. A mentor works your shifts with you, and once you can work alone, an assessor signs you off.'},q:{zh:'最難的是第一段訓練，我們要牽著他們的手走過去。',en:'The hardest part is the first stage of training. We have to hold their hand through it.'},by:'Aaron'},
+ {id:'guard',x:180,y:240,req:'signal',l:{zh:'Guard 列車長',en:'Guard'},img:[['s4-guard',{zh:'在列車長室拿著綠色旗子',en:'In the guard\'s van with the green flag'}]],d:{zh:'負責整列車與乘客的安全：發車、上下車與車廂檢查。綠旗一揮，司機才能開車。',en:'Responsible for the safety of the whole train and its passengers: departure, boarding and alighting, and carriage checks. The driver can\'t move until the green flag waves.'},q:{zh:'你不來，火車就開不了。',en:'If you don\'t come, the train can\'t run.'},by:'John'},
+ {id:'control',x:99,y:330,req:'guard',l:{zh:'Train Controller 行車調度',en:'Train Controller'},img:[['s4-control',{zh:'手繪的列車運行圖',en:'The hand-drawn train graph'}]],d:{zh:'調度全線列車與路牌，是當天行車的最終決定者。運行圖是手繪的：橫軸是時間、縱軸是車站，斜線代表列車在兩站之間行駛，轉折處就是停站或折返。',en:'Controls every train and staff on the line, and has the final say on the day\'s running. The train graph is drawn by hand: time runs across, stations run down, a sloping line is a train running between stations, and each corner is a stop or a reversal.'},q:{zh:'列車調度員是當天營運的最終老闆，但大家都歡迎建議。',en:'The train controller is the ultimate boss of the day\'s operations, but suggestions are always welcome.'},by:'Michael'},
+ {id:'diesel',x:256,y:330,req:'guard',l:{zh:'柴油機車司機',en:'Diesel driver'},img:[['s4-diesel',{zh:'檢查柴油機車的轉向架',en:'Checking a diesel locomotive\'s bogie'}]],d:{zh:'駕駛柴油機車與軌道車，出車前要先繞車檢查。',en:'Drive diesel locomotives and track vehicles, walking around the loco to inspect it before every run.'},q:{zh:'我太老了，鏟不動煤，所以想開柴油機車。',en:'I\'m too old to shovel coal, so I wanted to drive diesels.'},by:'Jim'},
+ {id:'fireman',x:367,y:330,req:'guard',l:{zh:'Fireman 司爐',en:'Steam fireman'},img:[['s4-fireman',{zh:'在煤堆裡鏟煤',en:'Shovelling in the coal stack'}]],d:{zh:'投煤、給水，盯著壓力和水位，永遠要想好下一步。',en:'Fire the coal and feed the water, watch the pressure and water level, and always think one step ahead.'},q:{zh:'你要讀懂鍋爐在說什麼。',en:'You have to read what the boiler is telling you.'},by:'Michael'},
+ {id:'driver',x:367,y:420,req:'fireman',l:{zh:'Driver 司機',en:'Steam driver'},img:[['s4-driver',{zh:'在蒸汽機車駕駛室，火室正在燃燒',en:'In the cab of a steam locomotive, the firebox burning'}]],d:{zh:'最高的一格。2021–22 年重新開放前，連老司機都從 Signaller 重新考起。',en:'The top step. Before reopening in 2021–22, even veteran drivers re-qualified from signaller upwards.'},q:{zh:'我花了 10 年才成為司機。我教的不是每種情況，而是原則。',en:'It took me 10 years to become a driver. I don\'t teach every situation; I teach the principles.'},by:'Lee'}
+];
+
+const KEEP=[
+ ['s5-1-infra',{zh:'實體設施：高架橋、隧道、路基',en:'The physical fabric: viaducts, tunnels, formation'},{zh:'1860 年代用砂岩砌成的三座高架橋、隧道，以及切在崖壁上的路基。',en:'The three sandstone viaducts built in the 1860s, the tunnels, and the formation cut into the cliffs.'},{zh:'這些是整條鐵路唯一「原本的東西」。車站多是 1975 年後重建的，車輛也來自外州；沒有高架橋和隧道，就沒有這條鐵路。在鐵路出現之前，羊毛和小麥要靠牛車花好幾天翻過山；這些工程讓幾天變成幾小時。',en:'These are the only “original things” on the whole railway. Most of the stations were rebuilt after 1975, and the rolling stock came from other states; without the viaducts and tunnels, there is no railway. Before the railway, wool and wheat took days to cross the mountains by bullock cart. These works turned days into hours.'}],
+ ['s5-2-landscape',{zh:'地景與廢道',en:'The landscape and the old line'},{zh:'山谷、崖壁，以及 Zig Zag 管理的約 10,000 英畝藍山荒野。',en:'The valley, the cliffs, and the roughly 10,000 acres of Blue Mountains wilderness the Zig Zag manages.'},{zh:'車輛會換、火車哪天可能停開，但廢道本身不會消失。岩壁上至今還看得到 1860 年代工人手工鑽岩的痕跡，保留區裡也有瀕危的昆蟲。',en:'Rolling stock gets replaced, and the trains might stop one day, but the old line itself won\'t disappear. You can still see where 1860s workers drilled the rock by hand, and the reserve is home to endangered insects.'}],
+ ['s5-3-people',{zh:'人與志工文化',en:'People and volunteer culture'},{zh:'一群人為了同一個目標聚在一起的文化，以及 1970 年代志工從一片野餐地重建鐵路的過程。',en:'A culture of people coming together for one goal, and the story of 1970s volunteers rebuilding a railway from a picnic ground.'},{zh:'沒有志工，火車就開不了。檔案裡還留著從林火中搶救下來的手寫會議紀錄；安全也是這個文化的一部分，不只為了工作人員，也為了乘客。',en:'Without volunteers, the trains don\'t run. The archive still holds handwritten meeting minutes rescued from the bushfire. Safety is part of this culture too, not only for the crew but for passengers.'}],
+ ['s5-4-skills',{zh:'技術與經驗的傳承',en:'Passing on skills and experience'},{zh:'怎麼燒鍋爐、怎麼修車、怎麼開車。',en:'How to fire a boiler, how to repair the stock, how to drive.'},{zh:'蒸汽機車是「活的、會呼吸的機器」，技術一旦中斷就很難接回來。Zig Zag 的蒸汽經驗從未中斷，每個人把自己的一小塊知識傳給下一個人。我們只是保管人。',en:'A steam locomotive is a “living, breathing machine,” and once the skills are lost they are very hard to recover. The Zig Zag\'s steam experience has never been broken; each person passes their small piece of knowledge to the next. We are only custodians.'}],
+ ['s5-5-steam',{zh:'讓蒸汽火車繼續跑',en:'Keeping steam running'},{zh:'活的蒸汽營運，以及坐在木造車廂裡、聽汽笛聲的體驗。',en:'Live steam operation, and the experience of sitting in a timber carriage listening to the whistle.'},{zh:'這條鐵路不是博物館，它成立的初衷就是讓蒸汽火車繼續跑。遊客來是為了「我爺爺以前……」的那種感覺；為了安全所做的修改，也會變成這台機車歷史的一部分。',en:'This railway isn\'t a museum; it was founded to keep steam trains running. Visitors come for that “my grandfather used to…” feeling. Changes made for safety also become part of the locomotive\'s history.'}],
+ ['s5-6-newhistory',{zh:'正在創造的新歷史',en:'New history being made'},{zh:'1975 年重新開放後這 50 年的一切，包括重建、關閉與重生。',en:'Everything from the 50 years since reopening in 1975, including the rebuilding, the closure and the revival.'},{zh:'很多人以為歷史是 100 年前的事，其實現在也正在變成歷史。有些機車在 Zig Zag 的時間，已經比在原本鐵路的時間還長；每一代的紀念徽章、新蓋卻做得像舊的車站，都值得留下紀錄。',en:'Many people think history is something from 100 years ago, but the present is becoming history too. Some locomotives have now spent longer at the Zig Zag than on their original railways. Every generation\'s commemorative badges, and the new stations built to look old, deserve to be recorded.'}]
+];
+
+const TAG={same:{zh:'一致',en:'Consistent'},shift:{zh:'已改變',en:'Changed'},diff:{zh:'分歧',en:'Diverged'}};
+const PAIRS=[
+ [{zh:'遊客為什麼來',en:'Why visitors come'},{zh:'多數人不是為了鐵路本身，而是為了娛樂與好奇。寒假時，有 24% 的人是「為了蒸汽」而來。',en:'Most came not for the railway itself but for recreation and curiosity. In the winter holidays, 24% came “for the steam.”'},{zh:'「火車對我很特別，但不一定對每個人都是。」多數人是家庭出遊，很多小孩是為了湯瑪士小火車而來。',en:'“Trains are special to me, but not necessarily to everyone.” Most visitors are families, and many children come because of Thomas the Tank Engine.'},'same',null],
+ [{zh:'懷舊',en:'Nostalgia'},{zh:'蒸汽定期班車 1970 年代初就停了，年輕人沒有親身經驗。懷舊會是「逐漸消失的動機」。',en:'Regular steam services ended in the early 1970s, so young people had no first-hand experience. Nostalgia would be a “diminishing motive.”'},{zh:'遊客說的是「我爺爺以前……」。「只有我這一代和更老的人，小時候搭過蒸汽火車。」',en:'Visitors say “my grandfather used to…”. “Only my generation and older rode steam trains as kids.”'},'shift',{zh:'懷舊沒有消失，從自己的回憶變成家人的回憶。',en:'Nostalgia hasn\'t disappeared; it has shifted from personal memory to family memory.'}],
+ [{zh:'什麼是「真的」',en:'What counts as “real”'},{zh:'軌距、軌道、車輛都不是原版，外州車輛被漆成像本地的，車站是組合屋改的。',en:'The gauge, track and rolling stock aren\'t original; interstate stock was painted to look local, and stations were converted portable buildings.'},{zh:'有些機車在 Zig Zag 的時間，已經是在原本鐵路的 2–3 倍。志工把 1975 年後的重建本身當成要保存的歷史。',en:'Some locomotives have now spent 2–3 times longer at the Zig Zag than on their original railways. Volunteers treat the post-1975 rebuilding itself as history worth preserving.'},'diff',null],
+ [{zh:'博物館',en:'A museum'},{zh:'遊客希望有紀念品店、茶室、野餐區，還有一座博物館。',en:'Visitors wanted a souvenir shop, a tearoom, picnic areas, and a museum.'},{zh:'商店、咖啡廳、停車場都有了，但仍有 4 位受訪者希望有一座博物館。',en:'The shop, café and car park now exist, but 4 interviewees still hope for a museum.'},'same',{zh:'35 年來還沒實現。',en:'Still not built after 35 years.'}],
+ [{zh:'志工的角色',en:'The volunteers\' role'},{zh:'預測制度化會削減原本的樂趣，志工會變成「地方觀光業的無償勞工」，大鐵路會聘少數全職專業人員。',en:'Predicted that formalisation would erode the original fun, volunteers would become “unpaid labour for the local tourism industry,” and larger railways would hire a few full-time professionals.'},{zh:'2026 年起一週七天營運，多位志工轉為支薪。但志工與員工走同一條升級路徑，志工一樣能升到司機。「唯一的差別，是能付出多少時間。」',en:'Since 2026, trains run seven days a week and several volunteers have moved into paid roles. But volunteers and staff follow the same path, and volunteers can still become drivers. “The only difference is how much time they can give.”'},'shift',{zh:'預測準確，但結果比他想的樂觀。',en:'The prediction came true, with a more optimistic outcome than he expected.'}],
+ [{zh:'錢從哪裡來',en:'Where the money comes from'},{zh:'政府與商業資金帶來龐大貸款，讓鐵路更依賴觀光。',en:'Government and commercial funding brought heavy loans, making the railway more dependent on tourism.'},{zh:'政府補助只是一次性專案，平常沒有政府資金；薪水全靠票券收入。',en:'Government grants are one-off projects; there is no ongoing government funding, and wages come entirely from ticket sales.'},'same',{zh:'依賴觀光的結構沒變，有了支薪人力後更深。',en:'The dependence on tourism remains, and deepens with paid staff.'}],
+ [{zh:'會不會再來',en:'Will they come back?'},{zh:'74% 是第一次來，回頭客多半一年內沒再來；幾乎都開車來。',en:'74% were first-time visitors; most repeat visitors hadn\'t returned within a year; nearly everyone came by car.'},{zh:'「大家不會每個月來，因為這趟車不會有太大變化。」希望接上 Newnes Junction，讓人搭電車就能來；國際旅行團是新的客群。',en:'“People won\'t come every month, because the trip doesn\'t change much.” The hope is to connect to Newnes Junction so people can arrive by electric train; international tour groups are a new market.'},'same',null],
+ [{zh:'後台要不要開放',en:'Opening up behind the scenes'},{zh:'建議開放機廠讓遊客參觀、解說機車怎麼運作。',en:'Recommended opening the workshop to visitors and explaining how locomotives work.'},{zh:'車組會讓乘客上駕駛台看看，解說多靠廣播和乘客發問；機廠仍不對外開放。',en:'Crews let passengers look into the cab, and interpretation relies mostly on announcements and passengers\' questions; the workshop is still closed to the public.'},'shift',{zh:'部分實現。',en:'Partly achieved.'}]
+];
+
+const VIS=[
+ [{zh:'延伸到 Newnes Junction',en:'Extend to Newnes Junction'},{zh:'從 Clarence 再往外延伸 2–3 公里，土地已經屬於合作社。接上 Newnes Junction 的月台後，遊客可以從雪梨搭電車、或搭 3801 等幹線觀光列車，在同一個月台直接轉乘 Zig Zag，不必開車。',en:'Extend 2–3 km beyond Clarence, on land the co-operative already owns. With a platform at Newnes Junction, visitors could come from Sydney by electric train, or on main-line heritage tours such as 3801, and change straight onto the Zig Zag on the same platform, without needing a car.'}],
+ [{zh:'在 Clarence 蓋新機廠',en:'A new workshop at Clarence'},{zh:'現在的機廠在山下的 Bottom Points，沒有道路直達、沒有天車，空間也不夠；每天早上還要先把空車開上山。在 Clarence 蓋一座有道路、有天車的重修機廠，山下的舊機廠則改做木工與油漆。',en:'Today\'s workshop is down at Bottom Points, with no road access, no overhead crane and not enough room, and every morning the empty train has to run up the hill first. Build a heavy-maintenance workshop at Clarence with road access and a crane, and turn the old workshop below into a carpentry and paint shop.'}],
+ [{zh:'更多可運行的機車與車廂',en:'More locomotives and carriages in service'},{zh:'目前一天最多只有 4 台機車運行，機廠裡還有好幾台蒸汽機車和車廂在等待翻修。把它們一台一台修好、放回軌道上，就能開更多班次。',en:'At most 4 locomotives run on any one day, and several steam locomotives and carriages in the workshop are waiting for restoration. Repair them one by one and return them to the track, and more trains can run.'}],
+ [{zh:'增班，讓更多人走完全程',en:'More services, so more people ride the whole line'},{zh:'現在每天只有一班開到 Bottom Points。改成兩組較短的列車、每小時一班，每次到站的人比較少，商店和咖啡廳不會一次湧入太多人，遊客也會逗留得更久。Clarence 也需要第二座月台。',en:'Today only one train a day runs all the way to Bottom Points. With two shorter trains running hourly, fewer people arrive at once, the shop and café aren\'t swamped, and visitors stay longer. Clarence will also need a second platform.'}],
+ [{zh:'一座博物館',en:'A museum'},{zh:'把舊照片掛上牆、放書讓人翻閱、把歷代紀念徽章放進展示櫃。現在的遊客想要的不只是搭一趟車，而是更沉浸的體驗；博物館也能給人「再來一次」的理由。',en:'Old photos on the walls, books to browse, and every generation\'s commemorative badges in display cases. Today\'s visitors want more than a train ride; they want a more immersive experience. A museum would also give people a reason to come back.'}],
+ [{zh:'恢復軌道車與野餐停靠點',en:'Bring back the rail motor and picnic stops'},{zh:'關閉之前，軌道車可以把遊客放在沿線的小月台，讓他們野餐、散步，傍晚再接回來。中段隧道後的空地也可以出租辦婚禮，或設成招手停靠的小站。',en:'Before the closure, the rail motor could drop visitors at small platforms along the line for a picnic or a walk, and pick them up again in the late afternoon. The open ground beyond the middle tunnel could be hired out for weddings, or become a request stop.'}],
+ [{zh:'重開步道與生態旅遊',en:'Reopen the walking tracks, and ecotourism'},{zh:'Zig Zag 管理著約 10,000 英畝的藍山荒野。希望重新開放被林火燒毀的步道與導覽健行，甚至蓋林間小屋；但一切都不能破壞這片保留區。',en:'The Zig Zag manages about 10,000 acres of Blue Mountains wilderness. The hope is to reopen walking tracks and guided walks lost to the bushfires, perhaps even build cabins in the bush, but nothing can harm the reserve.'}],
+ [{zh:'淨零排放',en:'Net zero'},{zh:'「我們的收入來自燃燒純碳。」計畫設定碳抵銷目標，用保留區的植被抵銷燃煤，也考慮軌道車改用氫能。每節車廂車頂已經有太陽能板，供電給車廂裡的燈。',en:'“Our income comes from burning pure carbon.” The plan sets a carbon-offset target, using the reserve\'s vegetation to offset the coal, and is considering hydrogen for the rail motors. Every carriage already has a solar panel on its roof powering its lights.'}],
+ [{zh:'把歷史放上網路',en:'Put the history online'},{zh:'把 30 年以上的會刊與紀錄掃描上線，輸入「Bottom Points」就能找到所有相關紀錄。同時開一個網路商店、推出自己的吉祥物，讓住得很遠的人也能支持這條鐵路。',en:'Scan more than 30 years of newsletters and records so that searching “Bottom Points” brings up every related record. Open an online shop and create a mascot as well, so people who live far away can support the railway too.'}],
+ [{zh:'幫其他鐵路代修',en:'Repairs for other railways'},{zh:'新南威爾斯州只有少數幾家公司能做蒸汽機車重修。Zig Zag 可以接外部案子，用收入補貼自己的維修。',en:'Only a handful of companies in New South Wales can overhaul steam locomotives. The Zig Zag could take on outside work and use the income to fund its own maintenance.'}],
+ [{zh:'變大，但保持原味',en:'Grow, but keep its character'},{zh:'大家都希望 Zig Zag 變得更大更好，但不要失去它原本的樣子：小而親切，而不是把遊客當成一個號碼的景點。兩列車、各約四分之三滿座，可能正好。',en:'Everyone wants the Zig Zag to get bigger and better, without losing what it is: small and friendly, not an attraction that treats visitors as a number. Two trains, each about three-quarters full, might be just right.'}]
+];
+
+/* ---------- renderers ---------- */
+function fig(src,cap){return `<figure class="ph"><img loading="lazy" src="${src}.jpg" alt="${esc(T(cap))}" width="1600" height="1200"><figcaption class="cap">${esc(T(cap))}</figcaption></figure>`}
+function renderTL(){$('tl').innerHTML=TL.map(e=>`<li class="${e.k?'key':''}"><div class="yr">${esc(T(e.y))}</div><div class="dot"></div><div class="ev"><h3>${esc(T(e.h))}</h3><p>${esc(T(e.d))}</p>${e.p?`<div class="pics ${e.p.length===1?'one':''}">${e.p.map(x=>fig(x[0],x[1])).join('')}</div>`:''}${e.pn?`<div class="cap">${esc(T(e.pn))}</div>`:''}</div></li>`).join('')}
+
+let area='all';
+function renderPeople(){
+  const f=$('flt');f.innerHTML='';
+  [['all',{zh:'全部',en:'All'}],...Object.entries(AREAS)].forEach(([k,v])=>{const b=document.createElement('button');b.type='button';b.className='chip';b.setAttribute('aria-pressed',area===k);b.textContent=T(v);b.onclick=()=>{area=k;renderPeople()};f.appendChild(b)});
+  const g=$('people');g.innerHTML='';
+  P.filter(p=>area==='all'||p[1]===area).forEach(p=>{
+    const c=document.createElement('button');c.type='button';c.className='card';c.setAttribute('aria-expanded','false');
+    c.innerHTML=`<span class="nm">${esc(p[0])}</span><span class="role">${esc(T(p[2]))}</span><span class="since">${lang==='zh'?'加入：':'Joined: '}${esc(T(p[3]))}</span><span class="more"><p>${esc(T(p[4]))}</p><span class="before"><b>${lang==='zh'?'過去':'Before'}</b>${esc(T(p[5]))}</span></span><span class="tog">${lang==='zh'?'為什麼加入 ＋':'Why they joined +'}</span>`;
+    c.onclick=()=>{const o=c.getAttribute('aria-expanded')==='true';c.setAttribute('aria-expanded',!o);c.querySelector('.tog').textContent=o?(lang==='zh'?'為什麼加入 ＋':'Why they joined +'):(lang==='zh'?'收起 －':'Close −')};
+    g.appendChild(c)});
+}
+
+/* skill tree */
+const NS='http://www.w3.org/2000/svg';
+const done=new Set();let sel='join',carIdx=0;
+const byId=Object.fromEntries(TREE.map(n=>[n.id,n]));
+const state=n=>done.has(n.id)?'done':(!n.req||done.has(n.req))?'open':'locked';
+function renderTree(){
+  const s=$('tree');s.innerHTML='';
+  TREE.filter(n=>n.req).forEach(n=>{const p=byId[n.req];const e=document.createElementNS(NS,'path');e.setAttribute('d',`M${p.x} ${p.y+16} C${p.x} ${(p.y+n.y)/2} ${n.x} ${(p.y+n.y)/2} ${n.x} ${n.y-16}`);e.setAttribute('class','edge'+(done.has(n.req)&&state(n)!=='locked'?' on':''));s.appendChild(e)});
+  TREE.forEach(n=>{const st=state(n);const g=document.createElementNS(NS,'g');g.setAttribute('class',`node ${st}${sel===n.id?' sel':''}`);g.setAttribute('tabindex','0');g.setAttribute('role','button');
+    const w=Math.max(80,[...T(n.l)].reduce((a,c)=>a+(c.charCodeAt(0)>0x2e80?13.5:7.3),0)+24+(st==='done'?12:0));
+    g.innerHTML=`<rect x="${n.x-w/2}" y="${n.y-16}" width="${w}" height="32" rx="3"/><text x="${n.x}" y="${n.y+4.5}" text-anchor="middle">${st==='done'?'✓ ':''}${esc(T(n.l))}</text>`;
+    g.setAttribute('aria-label',T(n.l));
+    const act=()=>{if(sel!==n.id){sel=n.id;carIdx=0}renderTree()};
+    g.onclick=act;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();act()}};s.appendChild(g)});
+  renderPanel();
+}
+function renderPanel(){
+  const n=byId[sel],st=state(n),im=n.img[carIdx%n.img.length];
+  const req=n.req?byId[n.req]:null;
+  let act='';
+  if(st==='open')act=`<button class="board act" type="button" id="unlock">${lang==='zh'?'解鎖這一格':'Unlock this step'}</button>`;
+  else if(st==='locked')act=`<p class="cap act">${lang==='zh'?`先解鎖「${esc(T(req.l))}」。`:`Unlock “${esc(T(req.l))}” first.`}</p>`;
+  const fin=done.has('driver')?`<p class="final">${lang==='zh'?'「你走完了整條路。下一站，我們停在 Bottom Points。」':'“You\'ve walked the whole path. Next stop: Bottom Points.”'}</p>`:'';
+  $('panel').innerHTML=`<div class="pimg"><img src="${im[0]}.jpg" alt="${esc(T(im[1]))}" width="1600" height="1200">${n.img.length>1?`<div class="car">${n.img.map((_,i)=>`<button type="button" data-i="${i}" aria-pressed="${i===carIdx%n.img.length}">${i+1}/${n.img.length}</button>`).join('')}</div>`:''}</div><div class="in"><div class="lvl">${esc(T(n.l))}</div><div class="pcap">${esc(T(im[1]))}</div><p>${esc(T(n.d))}</p><blockquote>${lang==='zh'?'「':'“'}${esc(T(n.q))}${lang==='zh'?'」':'”'}<cite style="display:block;font:400 12px var(--mono);color:var(--muted);font-style:normal;margin-top:4px">${esc(T(n.by))}</cite></blockquote>${act}${fin}</div>`;
+  $('panel').querySelectorAll('.car button').forEach(b=>b.onclick=()=>{carIdx=+b.dataset.i;renderPanel()});
+  const u=$('unlock');if(u)u.onclick=()=>{done.add(n.id);const next=TREE.find(m=>m.req===n.id&&!done.has(m.id));if(next){sel=next.id;carIdx=0}renderTree()};
+}
+
+function renderKeeps(){$('keeps').innerHTML=KEEP.map((k,i)=>`<details class="keep"><summary><div class="ph ai" data-label="${lang==='zh'?'AI 生成示意圖':'AI-generated illustration'}"><img loading="lazy" src="${k[0]}.jpg" alt="" width="1020" height="765" style="border-radius:0"></div><div class="hd"><b>${i+1}</b><h3>${esc(T(k[1]))}</h3><i aria-hidden="true">+</i></div></summary><div class="bd"><h4>${lang==='zh'?'保存什麼':'What to preserve'}</h4><p>${esc(T(k[2]))}</p><h4>${lang==='zh'?'為什麼':'Why'}</h4><p>${esc(T(k[3]))}</p></div></details>`).join('')}
+
+function renderPairs(){$('pairs').innerHTML=PAIRS.map((p,i)=>`<article class="pair"><div class="hd"><b>${i+1}</b><h3>${esc(T(p[0]))}</h3><span class="badge b-${p[3]}">${esc(T(TAG[p[3]]))}</span></div><div class="cols"><div class="y89"><h4>${lang==='zh'?'1989 遊客（Longworth）':'1989 visitors (Longworth)'}</h4><p>${esc(T(p[1]))}</p></div><div class="y26"><h4>${lang==='zh'?'2026 志工':'2026 volunteers'}</h4><p>${esc(T(p[2]))}</p></div></div>${p[4]?`<div class="verdict">${esc(T(p[4]))}</div>`:''}</article>`).join('')}
+
+function renderVis(){const open=[...document.querySelectorAll('#vis details')].map(d=>d.open);$('vis').innerHTML=VIS.map((v,i)=>`<li><details${open[i]?' open':''}><summary><b>${String(i+1).padStart(2,'0')}</b><h3>${esc(T(v[0]))}</h3><i aria-hidden="true">+</i></summary><div class="bd"><p>${esc(T(v[1]))}</p></div></details></li>`).join('')}
+
+/* ---------- zigzag animation ---------- */
+const ZZ=(()=>{
+  const g=$('zzT'),mg=$('mlTrain'),ml=$('ml'),say=$('zzSay'),btn=$('zzPause');
+  const pts1=[[70,50],[540,160],[598.4,173.7]],pts2=[[598.4,173.7],[540,160],[100,280],[51.8,293.2]];
+  const segs=p=>{let a=[],L=0;for(let i=1;i<p.length;i++){const l=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);a.push([p[i-1],p[i],L,l]);L+=l}return{a,L}};
+  const S1=segs(pts1),S2=segs(pts2);
+  const at=(S,s)=>{s=Math.max(0,Math.min(S.L,s));for(const [p,q,L0,l] of S.a){if(s<=L0+l+1e-6){const t=(s-L0)/l;return[p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t,Math.atan2(q[1]-p[1],q[0]-p[0])*180/Math.PI]}}return[...S.a.at(-1)[1],0]};
+  const GAP=17,N=4; // loco + 3 carriages
+  const els=[];for(let i=0;i<N;i++){const r=document.createElementNS(NS,'rect');r.setAttribute('x',-7);r.setAttribute('y',-5);r.setAttribute('width',14);r.setAttribute('height',10);r.setAttribute('rx',2);r.setAttribute('fill',i===0?'var(--ink)':'var(--red)');g.appendChild(r);els.push(r)}
+  const mls=[];for(let i=0;i<5;i++){const r=document.createElementNS(NS,'rect');r.setAttribute('x',-8);r.setAttribute('y',-4);r.setAttribute('width',16);r.setAttribute('height',8);r.setAttribute('rx',2);r.setAttribute('fill','var(--blue)');mg.appendChild(r);mls.push(r)}
+  const MLL=ml.getTotalLength();
+  const D1=5200,P1=1400,D2=5200,P2=1800,CYCLE=D1+P1+D2+P2;
+  const place=(r,x,y,a)=>r.setAttribute('transform',`translate(${x} ${y}) rotate(${a})`);
+  let acc=0,last=0,paused=reduce,prevPhase='';
+  const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  function draw(){
+    const t=acc%CYCLE;let phase;
+    const locoAt=(t<D1+P1/2||t>=CYCLE-P2/2)?0:N-1;els.forEach((r,i)=>r.setAttribute('fill',i===locoAt?'var(--ink)':'var(--red)'));
+    if(t<D1){const s=(N-1)*GAP+ease(t/D1)*(S1.L-(N-1)*GAP);els.forEach((r,i)=>{const[x,y,a]=at(S1,s-i*GAP);place(r,x,y,a)});phase='d1'}
+    else if(t<D1+P1){const s=S1.L;els.forEach((r,i)=>{const[x,y,a]=at(S1,s-i*GAP);place(r,x,y,a)});phase='p1'}
+    else if(t<D1+P1+D2){const u=ease((t-D1-P1)/D2)*(S2.L-(N-1)*GAP);els.forEach((r,i)=>{const[x,y,a]=at(S2,u+i*GAP);place(r,x,y,a)});phase='d2'}
+    else{const u=S2.L-(N-1)*GAP;els.forEach((r,i)=>{const[x,y,a]=at(S2,u+i*GAP);place(r,x,y,a)});phase='p2'}
+    const mt=(acc%9000)/4200;mls.forEach((r,i)=>{const s=mt*MLL-i*18;if(mt>1.25||s<0||s>MLL){r.setAttribute('opacity',0);return}r.setAttribute('opacity',1);const p=ml.getPointAtLength(s),q=ml.getPointAtLength(Math.min(MLL,s+1));place(r,p.x,p.y,Math.atan2(q.y-p.y,q.x-p.x)*180/Math.PI)});
+    if(phase!==prevPhase){prevPhase=phase;sayIt()}
+  }
+  function sayIt(){const m={d1:{zh:'機車在前，從 Clarence 下坡往 Top Points。',en:'Engine leading, the train runs down from Clarence towards Top Points.'},p1:{zh:'在 Top Points 停車、換方向，機車換到列車的另一頭。',en:'It stops at Top Points and changes direction; the engine moves to the other end of the train.'},d2:{zh:'往反方向開下一段：機車又在最前面，往 Bottom Points。',en:'It runs the next leg the other way, engine leading again, towards Bottom Points.'},p2:{zh:'到達 Bottom Points，再換一次方向，機車再換一次邊。',en:'It reaches Bottom Points, changes direction, and the engine changes ends again.'}};say.textContent=T(m[prevPhase]||m.d1)}
+  function frame(ts){if(!last)last=ts;const dt=ts-last;last=ts;if(!paused){acc+=dt;draw()}requestAnimationFrame(frame)}
+  function setP(p){paused=p;btn.setAttribute('aria-pressed',p);btn.innerHTML=p?'<span class="zh">播放</span><span class="en">Play</span>':'<span class="zh">暫停</span><span class="en">Pause</span>'}
+  btn.onclick=()=>setP(!paused);
+  if(reduce)acc=D1*0.6;draw();setP(paused);requestAnimationFrame(frame);
+  return{sayIt};
+})();
+
+/* ---------- lever game ---------- */
+const G=(()=>{
+  const POS={Af:[460,115],Ro:[585,115],B:[325,55],Lo:[60,115],Ar:[175,115]};
+  const LV=[{n:1,c:'red',k:{zh:'前端號誌',en:'Front signal'}},{n:2,c:'blue',k:{zh:'前端鎖',en:'Front lock'}},{n:3,c:'black',k:{zh:'前端道岔',en:'Front points'}},{n:4,c:'black',k:{zh:'後端道岔',en:'Rear points'}},{n:5,c:'blue',k:{zh:'後端鎖',en:'Rear lock'}},{n:6,c:'red',k:{zh:'後端號誌',en:'Rear signal'}}];
+  const start=()=>({pos:'Af',cpl:true,lv:[0,0,0,0,0,0,0],won:false});
+  let s=start(),moves=0,demoT=null;
+  const key=x=>x.pos+(x.cpl?1:0)+x.lv.slice(1).join('')+(x.won?1:0);
+  const clone=x=>({pos:x.pos,cpl:x.cpl,lv:x.lv.slice(),won:x.won});
+  const end={1:'f',2:'f',3:'f',4:'r',5:'r',6:'r'};
+  const blueOf=i=>end[i]==='f'?2:5, redOf=i=>end[i]==='f'?1:6;
+  // returns {ok,state} or {ok:false,msg}
+  function lever(x,i){
+    const y=clone(x),p=x.lv[i];
+    if(i===3||i===4){if(x.lv[blueOf(i)])return{ok:false,msg:{zh:`要先放開 ${blueOf(i)} 號鎖，才能動 ${i} 號道岔。`,en:`Release lock ${blueOf(i)} before you can move points ${i}.`}}}
+    if((i===2||i===5)&&p&&x.lv[redOf(i)])return{ok:false,msg:{zh:`要先放回 ${redOf(i)} 號號誌，才能放開 ${i} 號鎖。`,en:`Put back signal ${redOf(i)} before you can release lock ${i}.`}};
+    if((i===1||i===6)&&!p&&!x.lv[blueOf(i)])return{ok:false,msg:{zh:`道岔還沒鎖好。先拉 ${blueOf(i)} 號鎖，才能開 ${i} 號號誌。`,en:`The points aren't locked. Pull lock ${blueOf(i)} before you clear signal ${i}.`}};
+    y.lv[i]=p?0:1;return{ok:true,state:y};
+  }
+  const sigMsg=e=>e==='f'?{zh:'前端號誌還是紅燈。先拉 2 號鎖住道岔，再拉 1 號開號誌。',en:'The front signal is still red. Pull 2 to lock the points, then pull 1 to clear the signal.'}:{zh:'後端號誌還是紅燈。先拉 5 號鎖住道岔，再拉 6 號開號誌。',en:'The rear signal is still red. Pull 5 to lock the points, then pull 6 to clear the signal.'};
+  function ptsMsg(e,want){const pb=e==='f'?[1,2].filter(i=>s.lv[i]):[6,5].filter(i=>s.lv[i]);const n=e==='f'?3:4;const pre=pb.length?{zh:`先放回 ${pb.join('、')}，`,en:`Put back ${pb.join(' and ')}, then `}:{zh:'',en:''};
+    const nm=e==='f'?{zh:'前端',en:'front'}:{zh:'後端',en:'rear'};const cur=want==='B'?'A':'B';
+    return{zh:`${nm.zh}道岔還指向 ${cur} 軌。${pre.zh}${want==='B'?'拉':'放回'} ${n} 號切到 ${want} 軌。`,en:`The ${nm.en} points are still set for Road ${cur}. ${pre.en}${want==='B'?'pull':'put back'} ${n} to set Road ${want}.`}}
+  function move(x,dir){
+    const y=clone(x);
+    if(x.cpl&&(dir==='f'||dir==='r'))return{ok:false,msg:{zh:'機車還連著車廂，先按解聯。',en:'The engine is still coupled to the carriages. Press Uncouple first.'}};
+    const need=(e,want,to)=>{const n=e==='f'?3:4,sg=e==='f'?1:6;const set=x.lv[n]?'B':'A';if(set!==want)return{ok:false,msg:ptsMsg(e,want)};if(!x.lv[sg])return{ok:false,msg:sigMsg(e)};y.pos=to;return{ok:true,state:y}};
+    if(dir==='f'){
+      if(x.pos==='Af')return need('f','A','Ro');
+      if(x.pos==='Ro')return{ok:false,msg:{zh:'前面是軌道盡頭，該往回開了。',en:"That's the end of the line. Time to head back."}};
+      if(x.pos==='B')return need('f','B','Ro');
+      if(x.pos==='Lo'){const set=x.lv[4]?'B':'A';if(!x.lv[6])return{ok:false,msg:sigMsg('r')};y.pos=set==='A'?'Ar':'B';return{ok:true,state:y}}
+      if(x.pos==='Ar')return{ok:false,msg:{zh:'前面就是車廂，按「連結」把它們接上。',en:'The carriages are right in front. Press Couple to join them.'}};
+    }else{
+      if(x.pos==='Af')return{ok:false,msg:{zh:'機車後面就是車廂，不能倒退。',en:"The carriages are right behind the engine. It can't reverse."}};
+      if(x.pos==='Ro')return need('f','B','B');
+      if(x.pos==='B')return need('r','B','Lo');
+      if(x.pos==='Lo')return{ok:false,msg:{zh:'這裡不用再往後退了。把後端道岔切回 A 軌，再往前開。',en:"No need to go back further. Set the rear points back to Road A, then drive forward."}};
+      if(x.pos==='Ar')return need('r','A','Lo');
+    }
+  }
+  function couple(x){const y=clone(x);
+    if(x.pos==='Af'&&x.cpl){y.cpl=false;return{ok:true,state:y}}
+    if(x.pos==='Af'&&!x.cpl){y.cpl=true;return{ok:true,state:y}}
+    if(x.pos==='Ar'){y.cpl=true;y.won=true;return{ok:true,state:y}}
+    return{ok:false,msg:{zh:'機車旁邊沒有車廂可以連結。',en:'There are no carriages next to the engine to couple to.'}}}
+  const ACTS=[...[1,2,3,4,5,6].map(i=>['L',i]),['M','f'],['M','r'],['C']];
+  const apply=(x,a)=>a[0]==='L'?lever(x,a[1]):a[0]==='M'?move(x,a[1]):couple(x);
+  function bfs(from){const q=[[from,null]],seen=new Map([[key(from),null]]);const prev=new Map();
+    while(q.length){const[x]=q.shift();if(x.won){const path=[];let k=key(x);while(prev.has(k)){const[pk,a]=prev.get(k);path.unshift(a);k=pk}return path}
+      for(const a of ACTS){const r=apply(x,a);if(!r.ok)continue;const k=key(r.state);if(seen.has(k))continue;seen.set(k,1);prev.set(k,[key(x),a]);q.push([r.state])}}
+    return[]}
+  const MIN=bfs(start()).length;
+  const actName=a=>a[0]==='L'?(s.lv[a[1]]?{zh:`放回 ${a[1]} 號（${LV[a[1]-1].k.zh}）`,en:`Put back lever ${a[1]} (${LV[a[1]-1].k.en.toLowerCase()})`}:{zh:`拉 ${a[1]} 號（${LV[a[1]-1].k.zh}）`,en:`Pull lever ${a[1]} (${LV[a[1]-1].k.en.toLowerCase()})`}):a[0]==='M'?(a[1]==='f'?{zh:'按「前進」',en:'Press Forward'}:{zh:'按「後退」',en:'Press Reverse'}):(s.cpl?{zh:'按「解聯」',en:'Press Uncouple'}:{zh:'按「連結」',en:'Press Couple'});
+  const elFor=a=>a[0]==='L'?document.querySelector(`.lever[data-n="${a[1]}"]`):a[0]==='M'?$(a[1]==='f'?'gFwd':'gRev'):$('gCpl');
+  function flash(a){const e=elFor(a);if(!e)return;e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')}
+  let msg={zh:'機車拉著車廂停在 A 軌月台。先按「解聯」，讓機車和車廂分開。',en:'The engine has brought the carriages into Road A at the platform. Press Uncouple to separate the engine from the carriages.'},msgOk=false;
+  function setMsg(m,ok){msg=m;msgOk=!!ok;$('gMsg').textContent=T(m);$('gMsg').classList.toggle('ok',!!ok)}
+  const STEPS=[{zh:'機車拉著車廂，從單線開進 A 軌，停在月台。',en:'The engine pulls the carriages off the single line into Road A and stops at the platform.'},{zh:'機車與車廂分開。',en:'The engine uncouples from the carriages.'},{zh:'機車往前開，經過前端道岔後停下。',en:'The engine moves forward and stops past the front points.'},{zh:'前端道岔切到 B 軌，機車倒退進入 B 軌，從車廂旁邊經過。',en:'The front points are set to Road B, and the engine reverses into Road B, passing alongside the carriages.'},{zh:'機車繼續倒退，經過後端道岔，回到最一開始的單線上停下。',en:'The engine keeps reversing past the rear points and stops back on the single line where it started.'},{zh:'後端道岔切回 A 軌。',en:'The rear points are set back to Road A.'},{zh:'機車往前開進 A 軌，接上車廂的另一頭。',en:'The engine runs forward into Road A and couples onto the other end of the carriages.'},{zh:'完成換邊，列車可以往回開了。',en:'Run-around complete. The train can head back.'}];
+  function stepIdx(){if(s.won)return 8;if(s.pos==='Af')return s.cpl?1:2;if(s.pos==='Ro')return 3;if(s.pos==='B')return 4;if(s.pos==='Lo')return s.lv[4]?5:6;if(s.pos==='Ar')return 7;return 1}
+  function draw(){
+    const[x,y]=POS[s.pos];$('loco').style.transform=`translate(${x}px,${y}px)`;
+    const cars=$('cars');cars.innerHTML=[0,1,2].map(i=>`<rect x="${205+i*80}" y="${106}" width="72" height="18" rx="2" fill="var(--sand)"/>`).join('');
+    $('p3A').classList.toggle('off',!!s.lv[3]);$('p3B').classList.toggle('off',!s.lv[3]);
+    $('p4A').classList.toggle('off',!!s.lv[4]);$('p4B').classList.toggle('off',!s.lv[4]);
+    $('sigFront').querySelector('circle').setAttribute('fill',s.lv[1]?'#3E9A5B':'var(--red)');
+    $('sigRear').querySelector('circle').setAttribute('fill',s.lv[6]?'#3E9A5B':'var(--red)');
+    document.querySelectorAll('.lever').forEach(b=>b.setAttribute('aria-pressed',!!s.lv[+b.dataset.n]));
+    $('gCpl').innerHTML=s.cpl&&!s.won?'<span class="zh">解聯</span><span class="en">Uncouple</span>':'<span class="zh">連結</span><span class="en">Couple</span>';
+    $('gCount').textContent=lang==='zh'?`已用 ${moves} 個動作（最少 ${MIN} 個）`:`${moves} moves used (minimum ${MIN})`;
+    const si=stepIdx();$('gSteps').innerHTML=STEPS.map((t,i)=>`<li class="${i+1<si?'done':i+1===si?'now':''}">${esc(T(t))}</li>`).join('');
+    $('gMsg').textContent=T(msg);
+  }
+  function act(a,fromDemo){
+    if(s.won&&!fromDemo)return;
+    const r=apply(s,a);
+    if(!r.ok){const b=elFor(a);if(a[0]==='L'&&b){b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake')}setMsg(r.msg);const h=bfs(s)[0];if(h)flash(h);return}
+    s=r.state;moves++;
+    if(s.won)setMsg({zh:`換邊完成！你用了 ${moves} 個動作（最少 ${MIN} 個）。`,en:`Run-around complete! You used ${moves} moves (minimum ${MIN}).`},true);
+    else if(fromDemo)setMsg(actName(a));
+    else setMsg({zh:'很好。下一步呢？卡住了可以按「提示」。',en:'Good. What next? Press Hint if you get stuck.'});
+    draw();
+  }
+  function stopDemo(){if(demoT){clearInterval(demoT);demoT=null}}
+  function reset(){stopDemo();s=start();moves=0;setMsg({zh:'機車拉著車廂停在 A 軌月台。先按「解聯」，讓機車和車廂分開。',en:'The engine has brought the carriages into Road A at the platform. Press Uncouple to separate the engine from the carriages.'});draw()}
+  // build levers
+  const box=$('levers');LV.forEach((l,i)=>{if(i===3){const sp=document.createElement('span');sp.className='gap';box.appendChild(sp)}const b=document.createElement('button');b.type='button';b.className='lever '+l.c;b.dataset.n=l.n;b.setAttribute('aria-pressed','false');b.innerHTML=`<span class="n">${l.n}</span><span class="slot"><span class="h"></span></span><span class="k"><span class="zh">${l.k.zh}</span><span class="en">${l.k.en}</span></span>`;b.onclick=()=>{stopDemo();act(['L',l.n])};box.appendChild(b)});
+  $('gFwd').onclick=()=>{stopDemo();act(['M','f'])};$('gRev').onclick=()=>{stopDemo();act(['M','r'])};$('gCpl').onclick=()=>{stopDemo();act(['C'])};
+  $('gReset').onclick=reset;
+  $('gHint').onclick=()=>{stopDemo();if(s.won)return;const h=bfs(s)[0];if(h){setMsg({zh:'下一步：'+actName(h).zh,en:'Next: '+actName(h).en});flash(h)}};
+  $('gDemo').onclick=()=>{reset();const path=bfs(s);let i=0;setMsg({zh:'示範開始。',en:'Demo starting.'});demoT=setInterval(()=>{if(i>=path.length){stopDemo();return}act(path[i++],true)},reduce?600:1100)};
+  draw();
+  return{draw:()=>{draw();$('gMsg').textContent=T(msg)}};
+})();
+
+/* ---------- route map + scroll ---------- */
+const trk=$('trk'),train=$('train'),L=trk.getTotalLength();
+const secs=[...document.querySelectorAll('[data-at]')];
+const NAMES={c0:'Clarence',c1:'Clarence Tunnel',c2:'Top Points',c3:'Top Points',c4:'Middle Road',c5:'Bottom Points',c6:{zh:'機廠',en:'Workshop'},c7:{zh:'回程',en:'Return trip'},c8:'Clarence',c9:'Clarence'};
+let cur=0,target=0,raf=0;
+function moveTrain(){cur+=(target-cur)*.12;if(Math.abs(target-cur)<.001)cur=target;const p=trk.getPointAtLength(cur*L),q=trk.getPointAtLength(Math.min(L,cur*L+1));const a=Math.atan2(q.y-p.y,q.x-p.x)*180/Math.PI;train.setAttribute('transform',`translate(${p.x} ${p.y}) rotate(${a})`);raf=cur!==target?requestAnimationFrame(moveTrain):0}
+function onScroll(){const mid=innerHeight*.4;let i=0;for(let k=0;k<secs.length;k++){if(secs[k].getBoundingClientRect().top<mid)i=k}
+  const s=secs[i];target=+s.dataset.at;const nm=T(NAMES[s.id]);$('mini').textContent=nm;$('here').textContent=(lang==='zh'?'現在：':'Now: ')+nm;
+  if(reduce){cur=target;moveTrain()}else if(!raf)raf=requestAnimationFrame(moveTrain)}
+addEventListener('scroll',onScroll,{passive:true});
+document.querySelectorAll('.stn').forEach(g=>{const go=()=>$(g.dataset.go).scrollIntoView({behavior:reduce?'auto':'smooth'});g.onclick=go;g.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}}});
+
+/* ---------- language ---------- */
+function renderAll(){renderTL();renderPeople();renderTree();renderKeeps();renderPairs();renderVis();ZZ.sayIt();G.draw();onScroll()}
+function setLang(l){lang=l;root.setAttribute('data-lang',l);root.lang=l==='zh'?'zh-Hant':'en';document.title=l==='zh'?'之字形鐵路上的人':'The People of the Zig Zag';
+  $('b-zh').setAttribute('aria-pressed',l==='zh');$('b-en').setAttribute('aria-pressed',l==='en');try{localStorage.setItem('zz-lang',l)}catch(e){}renderAll()}
+$('b-zh').onclick=()=>setLang('zh');$('b-en').onclick=()=>setLang('en');
+let saved='zh';try{saved=localStorage.getItem('zz-lang')||'zh'}catch(e){}
+setLang(saved==='en'?'en':'zh');
+</script>
+
+</body>
+</html>
